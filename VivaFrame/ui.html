@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VivaFrame</title><style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 13px;
+    color: #1a1a1a;
+    background: #f5f5f5;
+    padding: 16px;
+  }
+
+  h2 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    color: #111;
+  }
+
+  label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1.5px solid #ddd;
+    border-radius: 6px;
+    font-size: 13px;
+    outline: none;
+    background: #fff;
+    transition: border-color 0.15s;
+  }
+  input[type="text"]:focus { border-color: #7c3aed; }
+  input[type="date"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1.5px solid #ddd;
+    border-radius: 6px;
+    font-size: 13px;
+    outline: none;
+    background: #fff;
+    transition: border-color 0.15s;
+    color: #1a1a1a;
+  }
+  input[type="date"]:focus { border-color: #7c3aed; }
+
+  .slug-preview {
+    margin-top: 5px;
+    font-size: 11px;
+    color: #888;
+    min-height: 16px;
+  }
+  .slug-preview span {
+    font-family: monospace;
+    background: #ede9fe;
+    color: #5b21b6;
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 14px 0 8px;
+  }
+
+  .platform-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 310px;
+    overflow-y: auto;
+    padding-right: 2px;
+  }
+
+  .platform-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border: 1.5px solid #e5e5e5;
+    border-radius: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    user-select: none;
+  }
+  .platform-item:hover { border-color: #a78bfa; background: #faf5ff; }
+  .platform-item.selected { border-color: #7c3aed; background: #f5f3ff; }
+
+  .platform-item input[type="radio"] {
+    accent-color: #7c3aed;
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .platform-info { flex: 1; }
+  .platform-name { font-weight: 600; font-size: 12px; color: #1a1a1a; }
+  .platform-size { font-size: 11px; color: #888; margin-top: 1px; }
+
+
+  .footer {
+    margin-top: 14px;
+    display: flex;
+    gap: 8px;
+  }
+
+  button.primary {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #7c3aed;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  button.primary:hover { background: #6d28d9; }
+  button.primary:disabled { background: #c4b5fd; cursor: not-allowed; }
+
+  button.secondary {
+    padding: 10px 14px;
+    border: 1.5px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    color: #555;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  button.secondary:hover { background: #f0f0f0; }
+
+  .toast {
+    display: none;
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: #d1fae5;
+    border: 1px solid #6ee7b7;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #065f46;
+  }
+</style>
+</head>
+<body>
+
+<h2>VivaFrame</h2>
+
+<label for="frameName">Frame Name</label>
+<input type="text" id="frameName" placeholder="e.g. Test Frame Name" autocomplete="off" />
+<div class="slug-preview" id="slugPreview">Slug will appear here</div>
+
+<div id="titleField" style="display:none;">
+<label for="blogTitle" style="margin-top:12px;">Title</label>
+<input type="text" id="blogTitle" placeholder="Your tittle will be here" autocomplete="off" />
+</div>
+
+<label for="frameDate" style="margin-top:12px;">Date (Section Name)</label>
+<input type="date" id="frameDate" autocomplete="off" />
+<div class="slug-preview" id="datePreview">Date slug will appear here</div>
+
+<div class="section-title">Select Platforms</div>
+
+<div class="platform-list" id="platformList"></div>
+
+<div class="footer">
+  <button class="secondary" id="closeBtn">Close</button>
+  <button class="primary" id="createBtn" disabled>Create Frames</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const NO_TITLE_SLUGS = new Set(["linkedin_inpost", "clutch_case_study", "website_case_study"]);
+
+  const PLATFORMS = [
+    { label: "Vivasoft Blog",     slug: "vivasoft_blog",     width: 1920, height: 1080 },
+    { label: "GBP Image",         slug: "gbp_image",         width: 1200, height: 900  },
+    { label: "Financfy Inpost",   slug: "financfy_inpost",   width: 1920, height: 1080 },
+    { label: "Linked Feature",    slug: "linked_feature",    width: 1200, height: 644  },
+    { label: "LinkedIn Inpost",   slug: "linkedin_inpost",   width: 1200, height: 675  },
+    { label: "Quora Image",       slug: "quora_image",       width: 800,  height: 450  },
+    { label: "Clutch Case Study", slug: "clutch_case_study", width: 1200, height: 900  },
+    { label: "Medium Image",      slug: "medium_image",      width: 1500, height: 750  },
+    { label: "Medium Inpost",       slug: "medium_inpost",       width: 1280,    height: 720    },
+    { label: "Website Case Study",  slug: "website_case_study",  width: 1198.17, height: 626    },
+  ];
+
+  const listEl      = document.getElementById("platformList");
+  const frameNameEl = document.getElementById("frameName");
+  const frameDateEl = document.getElementById("frameDate");
+  const slugPreview = document.getElementById("slugPreview");
+  const datePreview = document.getElementById("datePreview");
+  const createBtn   = document.getElementById("createBtn");
+  const toastEl     = document.getElementById("toast");
+
+  const MONTHS = ["january","february","march","april","may","june",
+                  "july","august","september","october","november","december"];
+
+  function toSlug(str) {
+    return str.trim().toLowerCase().replace(/[^a-z0-9\s_]/g, "").replace(/\s+/g, "_");
+  }
+
+  function toDateSlug(dateStr) {
+    // dateStr is "YYYY-MM-DD" from the date input
+    if (!dateStr) return "";
+    const [year, month, day] = dateStr.split("-");
+    const monthName = MONTHS[parseInt(month, 10) - 1];
+    const dd = String(parseInt(day, 10)).padStart(2, "0");
+    return `${dd}_${monthName}_${year}`;
+  }
+
+  // Build platform radio buttons
+  PLATFORMS.forEach((p, i) => {
+    const item = document.createElement("div");
+    item.className = "platform-item";
+    item.innerHTML = `
+      <input type="radio" name="platform" id="chk_${i}" value="${i}" />
+      <div class="platform-info">
+        <div class="platform-name">${p.label}</div>
+        <div class="platform-size">${p.width} × ${p.height} px</div>
+      </div>
+    `;
+    const radio = item.querySelector("input");
+    item.addEventListener("click", (e) => {
+      if (e.target !== radio) radio.checked = true;
+      listEl.querySelectorAll(".platform-item").forEach(el => el.classList.remove("selected"));
+      item.classList.add("selected");
+      updateCreateBtn();
+    });
+    listEl.appendChild(item);
+  });
+
+  function updateCreateBtn() {
+    const selected = listEl.querySelector("input[type=radio]:checked");
+    const hasName = frameNameEl.value.trim().length > 0;
+    const hasDate = frameDateEl.value.length > 0;
+    createBtn.disabled = !(selected && hasName && hasDate);
+
+    const idx = selected ? parseInt(selected.value) : -1;
+    const needsTitle = idx >= 0 && !NO_TITLE_SLUGS.has(PLATFORMS[idx].slug);
+    document.getElementById("titleField").style.display = needsTitle ? "block" : "none";
+  }
+
+  frameNameEl.addEventListener("input", () => {
+    const slug = toSlug(frameNameEl.value);
+    slugPreview.innerHTML = slug
+      ? `Slug: <span>${slug}</span>`
+      : "Slug will appear here";
+    updateCreateBtn();
+  });
+
+  frameDateEl.addEventListener("change", () => {
+    const ds = toDateSlug(frameDateEl.value);
+    datePreview.innerHTML = ds
+      ? `Section: <span>${ds}</span>`
+      : "Date slug will appear here";
+    updateCreateBtn();
+  });
+
+
+  document.getElementById("createBtn").addEventListener("click", () => {
+    const frameName = frameNameEl.value.trim();
+    const dateSlug  = toDateSlug(frameDateEl.value);
+    const blogTitle = document.getElementById("blogTitle").value.trim();
+    const radioSelected = listEl.querySelector("input[type=radio]:checked");
+    if (!frameName || !dateSlug || !radioSelected) return;
+    const selected = [PLATFORMS[parseInt(radioSelected.value)]];
+
+    createBtn.disabled = true;
+    createBtn.textContent = "Creating…";
+
+    parent.postMessage({ pluginMessage: { type: "create-frames", frameName, dateSlug, blogTitle, platforms: selected } }, "*");
+  });
+
+  document.getElementById("closeBtn").addEventListener("click", () => {
+    parent.postMessage({ pluginMessage: { type: "close" } }, "*");
+  });
+
+  window.onmessage = (event) => {
+    const msg = event.data.pluginMessage;
+    if (!msg) return;
+    if (msg.type === "done") {
+      createBtn.disabled = false;
+      createBtn.textContent = "Create Frames";
+      toastEl.style.display = "block";
+      toastEl.textContent = `✓ Frames created in section "${msg.dateSlug}"`;
+      setTimeout(() => { toastEl.style.display = "none"; }, 3500);
+    }
+  };
+</script>
+</body>
+</html>

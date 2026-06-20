@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Inter, -apple-system, sans-serif;
+      background: #1a1a2e;
+      color: #e8e8f0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    h2 {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      margin-bottom: 6px;
+      color: #c8d0f0;
+    }
+
+    p.hint {
+      font-size: 11px;
+      color: #7880a8;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      color: #8890b8;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .select-wrap {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px 36px 10px 14px;
+      border: 1px solid #2e3660;
+      border-radius: 8px;
+      background: #111428;
+      color: #e8e8f0;
+      font-size: 13px;
+      font-family: inherit;
+      appearance: none;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    select:focus {
+      border-color: #5273de;
+    }
+
+    .select-arrow {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: #5273de;
+      font-size: 10px;
+    }
+
+    .preview-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      border-radius: 8px;
+      background: #111428;
+      border: 1px solid #2e3660;
+      margin-bottom: 20px;
+    }
+
+    .color-swatch {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: background 0.2s;
+    }
+
+    .preview-text {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      transition: color 0.2s;
+    }
+
+    .hex-label {
+      margin-left: auto;
+      font-size: 11px;
+      font-family: monospace;
+      color: #7880a8;
+    }
+
+    .palette {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .palette-dot {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 5px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.15s, transform 0.1s;
+    }
+
+    .palette-dot:hover {
+      transform: scale(1.12);
+    }
+
+    .palette-dot.active {
+      border-color: #fff;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    button {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    button:active { transform: scale(0.97); }
+
+    #btn-apply {
+      background: #5273de;
+      color: #fff;
+    }
+
+    #btn-cancel {
+      background: #2e3660;
+      color: #c8d0f0;
+    }
+
+    #status {
+      margin-top: 12px;
+      font-size: 11px;
+      text-align: center;
+      min-height: 16px;
+      transition: color 0.2s;
+    }
+
+    #status.ok { color: #5de8a0; }
+    #status.err { color: #e85d5d; }
+  </style>
+</head>
+<body>
+
+  <h2>TextFlow</h2>
+  <p class="hint">Select a text layer in Figma, pick a color, then click Apply.</p>
+
+  <label>Choose color</label>
+
+  <div class="select-wrap">
+    <select id="color-select"></select>
+    <span class="select-arrow">▼</span>
+  </div>
+
+  <div class="preview-row">
+    <div class="color-swatch" id="swatch"></div>
+    <span class="preview-text" id="preview-text">Title Preview</span>
+    <span class="hex-label" id="hex-label"></span>
+  </div>
+
+  <div class="palette" id="palette"></div>
+
+  <div class="btn-row">
+    <button id="btn-apply">Apply Color</button>
+    <button id="btn-cancel">Cancel</button>
+  </div>
+
+  <div id="status"></div>
+
+  <script>
+    var COLORS = [
+      { hex: "#2F4BAE", name: "Royal Blue" },
+      { hex: "#57429F", name: "Purple" },
+      { hex: "#3475A4", name: "Steel Blue" },
+      { hex: "#042C7E", name: "Dark Navy" },
+      { hex: "#0B185D", name: "Deep Navy" },
+      { hex: "#1A2872", name: "Midnight Blue" },
+      { hex: "#1E4C7D", name: "Ocean Blue" },
+      { hex: "#203993", name: "Cobalt Blue" },
+      { hex: "#213287", name: "Indigo Blue" },
+      { hex: "#304ECE", name: "Bright Blue" },
+      { hex: "#3852A5", name: "Slate Blue" },
+      { hex: "#425FBC", name: "Cornflower Blue" },
+      { hex: "#457199", name: "Cadet Blue" },
+      { hex: "#523B90", name: "Dark Purple" },
+      { hex: "#5273DE", name: "Lavender Blue" },
+      { hex: "#58458D", name: "Amethyst" },
+      { hex: "#604C98", name: "Medium Purple" },
+      { hex: "#64417D", name: "Plum" }
+    ];
+
+    var selectedIndex = 0;
+
+    var select = document.getElementById("color-select");
+    var swatch = document.getElementById("swatch");
+    var previewText = document.getElementById("preview-text");
+    var hexLabel = document.getElementById("hex-label");
+    var palette = document.getElementById("palette");
+    var status = document.getElementById("status");
+
+    // Build dropdown
+    COLORS.forEach(function (c, i) {
+      var opt = document.createElement("option");
+      opt.value = i;
+      opt.textContent = c.hex + "  —  " + c.name;
+      select.appendChild(opt);
+    });
+
+    // Build palette dots
+    COLORS.forEach(function (c, i) {
+      var dot = document.createElement("div");
+      dot.className = "palette-dot" + (i === 0 ? " active" : "");
+      dot.style.background = c.hex;
+      dot.title = c.name + " " + c.hex;
+      dot.addEventListener("click", function () {
+        setSelected(i);
+      });
+      palette.appendChild(dot);
+    });
+
+    function setSelected(index) {
+      selectedIndex = index;
+      var c = COLORS[index];
+
+      select.value = index;
+      swatch.style.background = c.hex;
+      previewText.style.color = c.hex;
+      hexLabel.textContent = c.hex;
+
+      document.querySelectorAll(".palette-dot").forEach(function (d, i) {
+        d.classList.toggle("active", i === index);
+      });
+
+      clearStatus();
+    }
+
+    select.addEventListener("change", function () {
+      setSelected(parseInt(select.value, 10));
+    });
+
+    document.getElementById("btn-apply").addEventListener("click", function () {
+      parent.postMessage({
+        pluginMessage: { type: "apply-color", color: COLORS[selectedIndex].hex }
+      }, "*");
+    });
+
+    document.getElementById("btn-cancel").addEventListener("click", function () {
+      parent.postMessage({ pluginMessage: { type: "cancel" } }, "*");
+    });
+
+    window.onmessage = function (event) {
+      var msg = event.data.pluginMessage;
+      if (!msg) return;
+      if (msg.type === "success") showStatus(msg.text, "ok");
+      if (msg.type === "error") showStatus(msg.text, "err");
+    };
+
+    function showStatus(text, cls) {
+      status.textContent = text;
+      status.className = cls;
+    }
+
+    function clearStatus() {
+      status.textContent = "";
+      status.className = "";
+    }
+
+    // Init
+    setSelected(0);
+  </script>
+</body>
+</html>
