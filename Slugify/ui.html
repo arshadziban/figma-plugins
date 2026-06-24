@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f1117;
+      --surface:   #181c2a;
+      --border:    #252b42;
+      --border-hi: #3d4875;
+      --accent:    #5c7cfa;
+      --accent-hi: #7b96ff;
+      --green:     #4ade80;
+      --red:       #f87171;
+      --text:      #e2e6f3;
+      --muted:     #6b7499;
+      --label:     #9ba5cc;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 18px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-icon {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #5c7cfa 0%, #818cf8 100%);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .header-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.1px;
+    }
+
+    .header-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    /* ── Body ── */
+    .body {
+      flex: 1;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* ── Field group ── */
+    .field { display: flex; flex-direction: column; gap: 6px; }
+
+    .field-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--label);
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    input[type="text"]::placeholder { color: var(--muted); }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(92, 124, 250, 0.15);
+    }
+
+    /* ── Output card ── */
+    .output-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      min-height: 40px;
+      transition: border-color 0.2s;
+    }
+
+    .output-card.has-value { border-color: var(--border-hi); }
+
+    .output-slug {
+      font-family: 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
+      font-size: 12.5px;
+      color: var(--green);
+      word-break: break-all;
+      flex: 1;
+      letter-spacing: 0.2px;
+    }
+
+    .output-slug.empty { color: var(--muted); font-family: inherit; font-size: 12px; }
+
+    .copy-inline {
+      flex-shrink: 0;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 9px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      white-space: nowrap;
+    }
+
+    .copy-inline:hover {
+      border-color: var(--accent);
+      color: var(--accent-hi);
+      background: rgba(92,124,250,0.07);
+    }
+
+    .copy-inline:active { transform: scale(0.96); }
+
+    /* ── Separator ── */
+    .sep {
+      height: 1px;
+      background: var(--border);
+      margin: 0 -18px;
+    }
+
+    /* ── Status badge ── */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      min-height: 20px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: none;
+    }
+
+    .status-bar.ok  .status-dot { background: var(--green); display: block; }
+    .status-bar.err .status-dot { background: var(--red);   display: block; }
+    .status-bar.ok  .status-text { color: var(--green); }
+    .status-bar.err .status-text { color: var(--red); }
+    .status-text { color: transparent; }
+
+    /* ── Footer buttons ── */
+    .footer {
+      padding: 12px 18px 16px;
+      display: flex;
+      gap: 8px;
+    }
+
+    button.btn {
+      flex: 1;
+      padding: 9px 12px;
+      border-radius: 7px;
+      border: none;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+      letter-spacing: 0.1px;
+    }
+
+    button.btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #5c7cfa 0%, #818cf8 100%);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(92,124,250,0.3);
+    }
+
+    .btn-primary:hover { box-shadow: 0 4px 14px rgba(92,124,250,0.45); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+
+    .btn-ghost {
+      background: var(--surface);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover { border-color: var(--border-hi); color: var(--label); }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-icon">#_</div>
+    <div>
+      <div class="header-title">Slugify</div>
+      <div class="header-sub">Convert text to underscore slug</div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="body">
+
+    <div class="field">
+      <span class="field-label">Input</span>
+      <input type="text" id="input" placeholder="Paste your text here…" autocomplete="off" spellcheck="false" />
+    </div>
+
+    <div class="field">
+      <span class="field-label">Slug</span>
+      <div class="output-card" id="output-card">
+        <span class="output-slug empty" id="output">type something above…</span>
+        <button class="copy-inline" id="btn-copy">Copy</button>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="status-bar" id="status-bar">
+      <div class="status-dot"></div>
+      <span class="status-text" id="status-text"></span>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <button class="btn btn-primary" id="btn-apply" disabled>Apply</button>
+    <button class="btn btn-ghost" id="btn-cancel">Close</button>
+  </div>
+
+  <script>
+    var inputEl    = document.getElementById("input");
+    var outputEl   = document.getElementById("output");
+    var outputCard = document.getElementById("output-card");
+    var statusBar  = document.getElementById("status-bar");
+    var statusText = document.getElementById("status-text");
+    var btnApply   = document.getElementById("btn-apply");
+    var currentSlug = "";
+
+    inputEl.addEventListener("input", function () {
+      parent.postMessage({ pluginMessage: { type: "slugify", text: inputEl.value } }, "*");
+    });
+
+    document.getElementById("btn-copy").addEventListener("click", function () {
+      if (!currentSlug) return;
+      var ta = document.createElement("textarea");
+      ta.value = currentSlug;
+      ta.style.cssText = "position:fixed;top:0;left:0;opacity:0;pointer-events:none;";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      showStatus("Copied to clipboard!", "ok");
+    });
+
+    btnApply.addEventListener("click", function () {
+      if (!currentSlug) return;
+      parent.postMessage({ pluginMessage: { type: "apply", slug: currentSlug } }, "*");
+    });
+
+    document.getElementById("btn-cancel").addEventListener("click", function () {
+      parent.postMessage({ pluginMessage: { type: "cancel" } }, "*");
+    });
+
+    window.onmessage = function (event) {
+      var msg = event.data.pluginMessage;
+      if (!msg) return;
+
+      if (msg.type === "result") {
+        currentSlug = msg.slug;
+        if (msg.slug) {
+          outputEl.textContent = msg.slug;
+          outputEl.classList.remove("empty");
+          outputCard.classList.add("has-value");
+          btnApply.disabled = false;
+        } else {
+          outputEl.textContent = "type something above…";
+          outputEl.classList.add("empty");
+          outputCard.classList.remove("has-value");
+          btnApply.disabled = true;
+        }
+        clearStatus();
+      }
+
+      if (msg.type === "success") showStatus(msg.text, "ok");
+      if (msg.type === "error")   showStatus(msg.text, "err");
+    };
+
+    var statusTimer;
+    function showStatus(text, cls) {
+      statusText.textContent = text;
+      statusBar.className = "status-bar " + cls;
+      clearTimeout(statusTimer);
+      statusTimer = setTimeout(clearStatus, 3000);
+    }
+
+    function clearStatus() {
+      statusText.textContent = "";
+      statusBar.className = "status-bar";
+    }
+
+    inputEl.focus();
+  </script>
+</body>
+</html>
