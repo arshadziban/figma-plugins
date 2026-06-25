@@ -1,0 +1,11 @@
+{
+  "name": "Image Size Reducer",
+  "id": "image-size-reducer-local-001",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": ["none"]
+  }
+}
