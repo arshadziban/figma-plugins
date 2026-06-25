@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TypoMaker</title>
+<style>
+  /* ── Reset & Base ─────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --bg2: #f5f5f5;
+    --bg3: #ebebeb;
+    --border: #e0e0e0;
+    --text: #1a1a1a;
+    --text2: #666666;
+    --text3: #999999;
+    --accent: #7c5cbf;
+    --accent-light: #ede9f8;
+    --accent-hover: #6a4caa;
+    --success: #18a058;
+    --error: #d03050;
+    --warning: #f0a020;
+    --row-hover: #fafafa;
+    --row-alt: #fdfcff;
+    --shadow: 0 1px 3px rgba(0,0,0,.08);
+    --radius: 6px;
+    --radius-sm: 4px;
+    --transition: .15s ease;
+  }
+
+  .dark {
+    --bg: #1e1e1e;
+    --bg2: #2a2a2a;
+    --bg3: #333333;
+    --border: #3a3a3a;
+    --text: #f0f0f0;
+    --text2: #aaaaaa;
+    --text3: #666666;
+    --accent: #9d7fe0;
+    --accent-light: #2d2540;
+    --accent-hover: #b49ae8;
+    --row-hover: #242424;
+    --row-alt: #212130;
+    --shadow: 0 1px 3px rgba(0,0,0,.3);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+    font-size: 12px;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Layout ───────────────────────────────────────────────────── */
+  .app { display: flex; flex-direction: column; height: 100vh; }
+
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+
+  .header-title { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: -.3px; }
+  .header-sub { font-size: 11px; color: var(--text2); margin-left: 6px; }
+
+  .header-actions { display: flex; gap: 6px; align-items: center; }
+
+  .main { display: flex; flex: 1; overflow: hidden; }
+
+  /* ── Left Panel ───────────────────────────────────────────────── */
+  .left-panel {
+    width: 200px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 12px;
+    gap: 14px;
+    background: var(--bg);
+  }
+
+  .panel-section { display: flex; flex-direction: column; gap: 6px; }
+  .section-label { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .6px; }
+
+  /* ── Right Panel ──────────────────────────────────────────────── */
+  .right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .toolbar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+
+  .table-wrap {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+  }
+
+  /* ── Preview Strip ────────────────────────────────────────────── */
+  .preview-bar {
+    border-top: 1px solid var(--border);
+    background: var(--bg2);
+    height: 100px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 0 14px;
+    flex-shrink: 0;
+  }
+
+  .preview-item { white-space: nowrap; line-height: 1; }
+  .preview-label { font-size: 9px; color: var(--text3); margin-bottom: 2px; text-transform: uppercase; letter-spacing: .5px; }
+
+  /* ── Form Controls ────────────────────────────────────────────── */
+  input, select, textarea {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 11px;
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+
+  input:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-light);
+  }
+
+  .input-full { width: 100%; height: 28px; padding: 0 8px; }
+
+  select.input-full { cursor: pointer; }
+
+  .search-wrap { position: relative; }
+  .search-wrap input { padding-left: 26px; }
+  .search-icon {
+    position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
+    color: var(--text3); pointer-events: none; font-size: 11px;
+  }
+
+  /* ── Font Dropdown ────────────────────────────────────────────── */
+  .font-picker { position: relative; }
+  .font-picker-input {
+    width: 100%; height: 28px; padding: 0 24px 0 8px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); color: var(--text);
+    font-family: inherit; font-size: 11px; outline: none; cursor: pointer;
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+  .font-picker-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-light); }
+  .font-picker-arrow {
+    position: absolute; right: 7px; top: 50%; transform: translateY(-50%);
+    color: var(--text3); pointer-events: none; font-size: 9px;
+  }
+  .font-dropdown {
+    display: none; position: absolute; top: calc(100% + 3px); left: 0; right: 0;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: 0 4px 16px rgba(0,0,0,.12);
+    z-index: 50; flex-direction: column;
+  }
+  .font-dropdown.open { display: flex; }
+  .font-search-box {
+    padding: 6px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .font-search-box input {
+    width: 100%; height: 26px; padding: 0 8px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); color: var(--text);
+    font-family: inherit; font-size: 11px; outline: none;
+  }
+  .font-search-box input:focus { border-color: var(--accent); }
+  .font-list {
+    overflow-y: auto; max-height: 180px;
+  }
+  .font-list-item {
+    padding: 5px 10px; font-size: 11px; cursor: pointer; color: var(--text);
+    transition: background var(--transition);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .font-list-item:hover { background: var(--bg2); }
+  .font-list-item.selected { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+  .font-list-empty { padding: 10px; font-size: 11px; color: var(--text3); text-align: center; }
+
+  /* ── Buttons ──────────────────────────────────────────────────── */
+  .btn {
+    border: none; cursor: pointer; font-family: inherit;
+    font-size: 11px; font-weight: 500;
+    border-radius: var(--radius-sm);
+    padding: 0 12px; height: 28px;
+    display: inline-flex; align-items: center; gap: 5px;
+    transition: background var(--transition), color var(--transition), opacity var(--transition);
+    white-space: nowrap;
+  }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  .btn-primary {
+    background: var(--accent); color: #fff;
+  }
+  .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+
+  .btn-ghost {
+    background: transparent; color: var(--text2);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover:not(:disabled) { background: var(--bg2); color: var(--text); }
+
+  .btn-danger {
+    background: transparent; color: var(--error);
+    border: 1px solid var(--error);
+  }
+  .btn-danger:hover:not(:disabled) { background: var(--error); color: #fff; }
+
+  .btn-sm { height: 22px; padding: 0 8px; font-size: 10px; }
+  .btn-full { width: 100%; justify-content: center; }
+
+  .icon-btn {
+    background: transparent; border: none; cursor: pointer;
+    color: var(--text2); padding: 3px 5px;
+    border-radius: var(--radius-sm);
+    display: inline-flex; align-items: center;
+    transition: color var(--transition), background var(--transition);
+  }
+  .icon-btn:hover { background: var(--bg3); color: var(--text); }
+
+  /* ── Toggle ───────────────────────────────────────────────────── */
+  .toggle { position: relative; display: inline-flex; width: 30px; height: 16px; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-track {
+    position: absolute; inset: 0;
+    background: var(--bg3); border-radius: 99px; cursor: pointer;
+    transition: background var(--transition);
+  }
+  .toggle input:checked + .toggle-track { background: var(--accent); }
+  .toggle-thumb {
+    position: absolute; top: 2px; left: 2px;
+    width: 12px; height: 12px;
+    background: #fff; border-radius: 50%;
+    transition: transform var(--transition);
+    pointer-events: none;
+  }
+  .toggle input:checked ~ .toggle-thumb { transform: translateX(14px); }
+
+  /* ── Table ────────────────────────────────────────────────────── */
+  table { width: 100%; border-collapse: collapse; }
+
+  thead th {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--bg);
+    padding: 6px 8px;
+    text-align: left;
+    font-size: 10px; font-weight: 600; color: var(--text3);
+    text-transform: uppercase; letter-spacing: .5px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background var(--transition);
+  }
+  tbody tr:hover { background: var(--row-hover); }
+  tbody tr.disabled-row { opacity: .45; }
+
+  td { padding: 4px 8px; vertical-align: middle; }
+
+  .cell-name { min-width: 100px; }
+  .cell-input { min-width: 80px; }
+  .cell-preview { min-width: 140px; }
+  .cell-toggle { width: 40px; text-align: center; }
+  .cell-actions { width: 50px; text-align: right; }
+
+  .td-name-input {
+    background: transparent; border: 1px solid transparent;
+    width: 100%; padding: 2px 4px;
+    font-size: 11px; font-weight: 500; color: var(--text);
+    border-radius: var(--radius-sm);
+  }
+  .td-name-input:hover { border-color: var(--border); background: var(--bg2); }
+  .td-name-input:focus { border-color: var(--accent); background: var(--bg2); box-shadow: 0 0 0 2px var(--accent-light); }
+
+  .td-num-input {
+    background: transparent; border: 1px solid transparent;
+    width: 100%; padding: 2px 4px;
+    font-size: 11px; color: var(--text);
+    border-radius: var(--radius-sm); text-align: right;
+  }
+  .td-num-input:hover { border-color: var(--border); background: var(--bg2); }
+  .td-num-input:focus { border-color: var(--accent); background: var(--bg2); box-shadow: 0 0 0 2px var(--accent-light); }
+
+  .td-select {
+    background: transparent; border: 1px solid transparent;
+    width: 100%; padding: 2px 2px;
+    font-size: 11px; color: var(--text);
+    border-radius: var(--radius-sm); cursor: pointer;
+  }
+  .td-select:hover { border-color: var(--border); background: var(--bg2); }
+  .td-select:focus { border-color: var(--accent); background: var(--bg2); box-shadow: 0 0 0 2px var(--accent-light); }
+
+  /* ── Modal ────────────────────────────────────────────────────── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.5); z-index: 100;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--bg); border-radius: var(--radius);
+    box-shadow: 0 8px 30px rgba(0,0,0,.2);
+    padding: 20px; max-width: 420px; width: 90%;
+  }
+  .modal-title { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+  .modal-body { font-size: 11px; color: var(--text2); line-height: 1.5; margin-bottom: 16px; }
+  .modal-body ul { margin: 8px 0 0 16px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .modal-radio-group { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; }
+  .modal-radio { display: flex; align-items: flex-start; gap: 8px; cursor: pointer; }
+  .modal-radio input { margin-top: 2px; accent-color: var(--accent); }
+  .modal-radio-label { font-size: 11px; font-weight: 600; color: var(--text); }
+  .modal-radio-desc { font-size: 10px; color: var(--text2); }
+
+  /* ── Toast ────────────────────────────────────────────────────── */
+  .toast-area {
+    position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; gap: 6px; z-index: 200;
+    pointer-events: none;
+  }
+  .toast {
+    padding: 8px 14px; border-radius: var(--radius);
+    font-size: 11px; font-weight: 500;
+    box-shadow: 0 4px 16px rgba(0,0,0,.2);
+    animation: toastIn .2s ease forwards;
+    pointer-events: auto;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toast-success { background: var(--success); color: #fff; }
+  .toast-error { background: var(--error); color: #fff; }
+  .toast-info { background: var(--accent); color: #fff; }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Chip / Badge ─────────────────────────────────────────────── */
+  .chip {
+    display: inline-block; padding: 1px 6px;
+    border-radius: 99px; font-size: 9px; font-weight: 600;
+    background: var(--accent-light); color: var(--accent);
+  }
+
+  /* ── Divider ──────────────────────────────────────────────────── */
+  .divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+  /* ── Scrollbar ────────────────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  /* ── Utility ──────────────────────────────────────────────────── */
+  .flex { display: flex; }
+  .items-center { align-items: center; }
+  .gap-4 { gap: 4px; }
+  .gap-6 { gap: 6px; }
+  .text-muted { color: var(--text2); }
+  .text-xs { font-size: 10px; }
+  .font-bold { font-weight: 700; }
+  .ml-auto { margin-left: auto; }
+
+  /* ── Loading state ────────────────────────────────────────────── */
+  .loading-row td {
+    text-align: center; padding: 40px;
+    color: var(--text3); font-size: 11px;
+  }
+
+  /* ── Preset list ─────────────────────────────────────────────── */
+  .preset-list { display: flex; flex-direction: column; gap: 2px; }
+  .preset-item {
+    display: flex; align-items: center; padding: 5px 7px;
+    border-radius: var(--radius-sm); cursor: pointer;
+    font-size: 11px; gap: 6px;
+    border: 1px solid transparent;
+    transition: background var(--transition), border-color var(--transition);
+  }
+  .preset-item:hover { background: var(--bg2); }
+  .preset-item.active { background: var(--accent-light); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  .preset-item .preset-del { margin-left: auto; display: none; }
+  .preset-item:hover .preset-del { display: inline-flex; }
+</style>
+</head>
+<body>
+
+<!-- ── App Shell ──────────────────────────────────────────────────────────── -->
+<div class="app" id="app">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="flex items-center gap-6">
+      <span class="header-title">TypoMaker</span>
+      <span class="header-sub">Typography Style Importer</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost btn-sm" id="btn-export-json" title="Export as JSON">⬇ Export</button>
+      <label class="btn btn-ghost btn-sm" title="Import JSON" style="cursor:pointer">
+        ⬆ Import
+        <input type="file" id="import-json-file" accept=".json" style="display:none">
+      </label>
+      <button class="icon-btn" id="btn-dark-toggle" title="Toggle dark mode">☀</button>
+    </div>
+  </header>
+
+  <div class="main">
+
+    <!-- ── Left Panel ────────────────────────────────────────────── -->
+    <aside class="left-panel">
+
+      <div class="panel-section">
+        <div class="section-label">Font Family</div>
+        <div class="font-picker" id="font-picker">
+          <input class="font-picker-input" id="font-picker-input" type="text" readonly placeholder="Loading fonts…" autocomplete="off">
+          <span class="font-picker-arrow">▼</span>
+          <div class="font-dropdown" id="font-dropdown">
+            <div class="font-search-box">
+              <input type="text" id="font-search" placeholder="Search fonts…" autocomplete="off">
+            </div>
+            <div class="font-list" id="font-list"></div>
+          </div>
+        </div>
+        <div id="font-loading" class="text-xs text-muted" style="display:none">Loading fonts…</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="panel-section">
+        <div class="section-label">Preset</div>
+        <div class="preset-list" id="preset-list"></div>
+        <button class="btn btn-ghost btn-sm" id="btn-save-preset" style="margin-top:4px">+ Save Custom</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="panel-section">
+        <div class="section-label">Search Styles</div>
+        <div class="search-wrap">
+          <span class="search-icon">⌕</span>
+          <input class="input-full" type="text" id="style-search" placeholder="Filter styles…">
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="panel-section" style="gap:6px;margin-top:auto">
+        <button class="btn btn-primary btn-full" id="btn-import">▶ Import Styles</button>
+        <button class="btn btn-ghost btn-full" id="btn-reset">↺ Reset to Default</button>
+      </div>
+
+    </aside>
+
+    <!-- ── Right Panel ───────────────────────────────────────────── -->
+    <div class="right-panel">
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <button class="btn btn-ghost btn-sm" id="btn-select-all">Select All</button>
+        <button class="btn btn-ghost btn-sm" id="btn-deselect-all">Deselect All</button>
+        <div class="divider" style="width:1px;height:16px;margin:0"></div>
+        <button class="btn btn-ghost btn-sm" id="btn-add-style">+ Add Style</button>
+        <button class="btn btn-ghost btn-sm" id="btn-apply-scale">Apply Scale</button>
+        <div class="flex items-center gap-4 ml-auto">
+          <span class="text-xs text-muted" id="style-count-label">15 styles</span>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <table id="typo-table">
+          <thead>
+            <tr>
+              <th class="cell-toggle"><input type="checkbox" id="th-all-check" title="Toggle all"></th>
+              <th class="cell-name">Style Name</th>
+              <th class="cell-input">Weight</th>
+              <th class="cell-input">Size</th>
+              <th class="cell-input">Line Ht</th>
+              <th class="cell-input">Letter Sp</th>
+              <th class="cell-preview">Preview</th>
+              <th class="cell-actions"></th>
+            </tr>
+          </thead>
+          <tbody id="typo-tbody">
+            <tr class="loading-row"><td colspan="8">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Preview bar -->
+      <div class="preview-bar" id="preview-bar">
+        <span class="text-xs text-muted">Select a font to see preview</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── Modals ─────────────────────────────────────────────────────────────── -->
+
+<!-- Conflict Modal -->
+<div class="modal-overlay" id="conflict-modal">
+  <div class="modal">
+    <div class="modal-title">Styles Already Exist</div>
+    <div class="modal-body">
+      The following styles already exist in this file:
+      <ul id="conflict-list"></ul>
+    </div>
+    <div class="modal-radio-group">
+      <label class="modal-radio">
+        <input type="radio" name="conflict" value="replace" checked>
+        <div>
+          <div class="modal-radio-label">Replace</div>
+          <div class="modal-radio-desc">Overwrite existing styles with new values</div>
+        </div>
+      </label>
+      <label class="modal-radio">
+        <input type="radio" name="conflict" value="skip">
+        <div>
+          <div class="modal-radio-label">Skip</div>
+          <div class="modal-radio-desc">Keep existing styles, import only new ones</div>
+        </div>
+      </label>
+      <label class="modal-radio">
+        <input type="radio" name="conflict" value="duplicate">
+        <div>
+          <div class="modal-radio-label">Duplicate</div>
+          <div class="modal-radio-desc">Create new styles with " Copy" suffix</div>
+        </div>
+      </label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="conflict-cancel">Cancel</button>
+      <button class="btn btn-primary" id="conflict-confirm">Proceed</button>
+    </div>
+  </div>
+</div>
+
+<!-- Save Preset Modal -->
+<div class="modal-overlay" id="preset-modal">
+  <div class="modal">
+    <div class="modal-title">Save Custom Preset</div>
+    <div class="modal-body">Give your typography preset a name so you can reload it later.</div>
+    <input class="input-full" type="text" id="preset-name-input" placeholder="e.g. My Brand Type" style="margin-bottom:12px">
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="preset-modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="preset-modal-confirm">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Scale Modal -->
+<div class="modal-overlay" id="scale-modal">
+  <div class="modal">
+    <div class="modal-title">Apply Scale</div>
+    <div class="modal-body">Multiply all font sizes by a factor.</div>
+    <div class="flex items-center gap-6" style="margin-bottom:12px">
+      <label style="font-size:11px;color:var(--text2)">Scale Factor</label>
+      <input class="td-num-input" type="number" id="scale-factor-input" value="1" min="0.1" max="4" step="0.05"
+        style="width:70px;border:1px solid var(--border);padding:4px 6px;background:var(--bg2)">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="scale-cancel">Cancel</button>
+      <button class="btn btn-primary" id="scale-confirm">Apply</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast area -->
+<div class="toast-area" id="toast-area"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// Data
+// ─────────────────────────────────────────────────────────────────────────────
+
+const PRESETS = {
+  "Default": buildDefault("Inter"),
+
+  "Material Design 3": [
+    { name:"Display Large",  figmaName:"Display/Large",  fontSize:57, fontWeight:"Regular", lineHeight:64, lineHeightUnit:"PIXELS", letterSpacing:-0.25, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Display Medium", figmaName:"Display/Medium", fontSize:45, fontWeight:"Regular", lineHeight:52, lineHeightUnit:"PIXELS", letterSpacing:0,     paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Display Small",  figmaName:"Display/Small",  fontSize:36, fontWeight:"Regular", lineHeight:44, lineHeightUnit:"PIXELS", letterSpacing:0,     paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Headline Large", figmaName:"Headline/Large", fontSize:32, fontWeight:"Regular", lineHeight:40, lineHeightUnit:"PIXELS", letterSpacing:0,     paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Headline Medium",figmaName:"Headline/Medium",fontSize:28, fontWeight:"Regular", lineHeight:36, lineHeightUnit:"PIXELS", letterSpacing:0,     paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Headline Small", figmaName:"Headline/Small", fontSize:24, fontWeight:"Regular", lineHeight:32, lineHeightUnit:"PIXELS", letterSpacing:0,     paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Title Large",    figmaName:"Title/Large",    fontSize:22, fontWeight:"Regular", lineHeight:28, lineHeightUnit:"PIXELS", letterSpacing:0,     paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Title Medium",   figmaName:"Title/Medium",   fontSize:16, fontWeight:"Medium",  lineHeight:24, lineHeightUnit:"PIXELS", letterSpacing:0.15,  paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Title Small",    figmaName:"Title/Small",    fontSize:14, fontWeight:"Medium",  lineHeight:20, lineHeightUnit:"PIXELS", letterSpacing:0.1,   paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Label Large",    figmaName:"Label/Large",    fontSize:14, fontWeight:"Medium",  lineHeight:20, lineHeightUnit:"PIXELS", letterSpacing:0.1,   paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Label Medium",   figmaName:"Label/Medium",   fontSize:12, fontWeight:"Medium",  lineHeight:16, lineHeightUnit:"PIXELS", letterSpacing:0.5,   paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Label Small",    figmaName:"Label/Small",    fontSize:11, fontWeight:"Medium",  lineHeight:16, lineHeightUnit:"PIXELS", letterSpacing:0.5,   paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Body Large",     figmaName:"Body/Large",     fontSize:16, fontWeight:"Regular", lineHeight:24, lineHeightUnit:"PIXELS", letterSpacing:0.5,   paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Body Medium",    figmaName:"Body/Medium",    fontSize:14, fontWeight:"Regular", lineHeight:20, lineHeightUnit:"PIXELS", letterSpacing:0.25,  paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Body Small",     figmaName:"Body/Small",     fontSize:12, fontWeight:"Regular", lineHeight:16, lineHeightUnit:"PIXELS", letterSpacing:0.4,   paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+  ],
+
+  "Apple HIG": [
+    { name:"Large Title", figmaName:"Large Title", fontSize:34, fontWeight:"Regular",   lineHeight:41, lineHeightUnit:"PIXELS", letterSpacing:0.37,  paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Title 1",     figmaName:"Title 1",     fontSize:28, fontWeight:"Regular",   lineHeight:34, lineHeightUnit:"PIXELS", letterSpacing:0.36,  paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Title 2",     figmaName:"Title 2",     fontSize:22, fontWeight:"Regular",   lineHeight:28, lineHeightUnit:"PIXELS", letterSpacing:0.35,  paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Title 3",     figmaName:"Title 3",     fontSize:20, fontWeight:"Regular",   lineHeight:25, lineHeightUnit:"PIXELS", letterSpacing:0.38,  paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Headline",    figmaName:"Headline",    fontSize:17, fontWeight:"Semi Bold", lineHeight:22, lineHeightUnit:"PIXELS", letterSpacing:-0.41, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Body",        figmaName:"Body",        fontSize:17, fontWeight:"Regular",   lineHeight:22, lineHeightUnit:"PIXELS", letterSpacing:-0.41, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Callout",     figmaName:"Callout",     fontSize:16, fontWeight:"Regular",   lineHeight:21, lineHeightUnit:"PIXELS", letterSpacing:-0.32, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Subheadline", figmaName:"Subheadline", fontSize:15, fontWeight:"Regular",   lineHeight:20, lineHeightUnit:"PIXELS", letterSpacing:-0.24, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Footnote",    figmaName:"Footnote",    fontSize:13, fontWeight:"Regular",   lineHeight:18, lineHeightUnit:"PIXELS", letterSpacing:-0.08, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Caption 1",   figmaName:"Caption 1",   fontSize:12, fontWeight:"Regular",   lineHeight:16, lineHeightUnit:"PIXELS", letterSpacing:0,     paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Caption 2",   figmaName:"Caption 2",   fontSize:11, fontWeight:"Regular",   lineHeight:13, lineHeightUnit:"PIXELS", letterSpacing:0.07,  paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+  ],
+
+  "Tailwind CSS": [
+    { name:"text-xs",   figmaName:"Text/xs",   fontSize:12, fontWeight:"Regular", lineHeight:16, lineHeightUnit:"PIXELS", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"text-sm",   figmaName:"Text/sm",   fontSize:14, fontWeight:"Regular", lineHeight:20, lineHeightUnit:"PIXELS", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"text-base", figmaName:"Text/base", fontSize:16, fontWeight:"Regular", lineHeight:24, lineHeightUnit:"PIXELS", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"text-lg",   figmaName:"Text/lg",   fontSize:18, fontWeight:"Regular", lineHeight:28, lineHeightUnit:"PIXELS", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"text-xl",   figmaName:"Text/xl",   fontSize:20, fontWeight:"Regular", lineHeight:28, lineHeightUnit:"PIXELS", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"text-2xl",  figmaName:"Text/2xl",  fontSize:24, fontWeight:"Regular", lineHeight:32, lineHeightUnit:"PIXELS", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"text-3xl",  figmaName:"Text/3xl",  fontSize:30, fontWeight:"Semi Bold",lineHeight:36,lineHeightUnit:"PIXELS", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"text-4xl",  figmaName:"Text/4xl",  fontSize:36, fontWeight:"Bold",    lineHeight:40, lineHeightUnit:"PIXELS", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"text-5xl",  figmaName:"Text/5xl",  fontSize:48, fontWeight:"Bold",    lineHeight:1,  lineHeightUnit:"PERCENT",letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"text-6xl",  figmaName:"Text/6xl",  fontSize:60, fontWeight:"Bold",    lineHeight:1,  lineHeightUnit:"PERCENT",letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"text-7xl",  figmaName:"Text/7xl",  fontSize:72, fontWeight:"Extra Bold",lineHeight:1,lineHeightUnit:"PERCENT",letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"text-8xl",  figmaName:"Text/8xl",  fontSize:96, fontWeight:"Extra Bold",lineHeight:1,lineHeightUnit:"PERCENT",letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"text-9xl",  figmaName:"Text/9xl",  fontSize:128,fontWeight:"Extra Bold",lineHeight:1,lineHeightUnit:"PERCENT",letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+  ],
+
+  "Bootstrap 5": [
+    { name:"h1", figmaName:"Bootstrap/h1", fontSize:40, fontWeight:"Bold",    lineHeight:120, lineHeightUnit:"PERCENT", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"h2", figmaName:"Bootstrap/h2", fontSize:32, fontWeight:"Bold",    lineHeight:120, lineHeightUnit:"PERCENT", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"h3", figmaName:"Bootstrap/h3", fontSize:28, fontWeight:"Bold",    lineHeight:120, lineHeightUnit:"PERCENT", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"h4", figmaName:"Bootstrap/h4", fontSize:24, fontWeight:"Bold",    lineHeight:120, lineHeightUnit:"PERCENT", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"h5", figmaName:"Bootstrap/h5", fontSize:20, fontWeight:"Bold",    lineHeight:120, lineHeightUnit:"PERCENT", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"h6", figmaName:"Bootstrap/h6", fontSize:16, fontWeight:"Bold",    lineHeight:120, lineHeightUnit:"PERCENT", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Lead",     figmaName:"Bootstrap/Lead",     fontSize:20, fontWeight:"Light",   lineHeight:150, lineHeightUnit:"PERCENT", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Body",     figmaName:"Bootstrap/Body",     fontSize:16, fontWeight:"Regular", lineHeight:150, lineHeightUnit:"PERCENT", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Small",    figmaName:"Bootstrap/Small",    fontSize:14, fontWeight:"Regular", lineHeight:150, lineHeightUnit:"PERCENT", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Code",     figmaName:"Bootstrap/Code",     fontSize:16, fontWeight:"Regular", lineHeight:150, lineHeightUnit:"PERCENT", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Caption",  figmaName:"Bootstrap/Caption",  fontSize:12, fontWeight:"Regular", lineHeight:150, lineHeightUnit:"PERCENT", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+  ],
+
+  "Fluent Design": [
+    { name:"Caption",       figmaName:"Fluent/Caption",       fontSize:12, fontWeight:"Regular", lineHeight:16, lineHeightUnit:"PIXELS", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Body",          figmaName:"Fluent/Body",          fontSize:14, fontWeight:"Regular", lineHeight:20, lineHeightUnit:"PIXELS", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Body Strong",   figmaName:"Fluent/Body Strong",   fontSize:14, fontWeight:"Semi Bold",lineHeight:20,lineHeightUnit:"PIXELS", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Body Large",    figmaName:"Fluent/Body Large",    fontSize:18, fontWeight:"Regular", lineHeight:24, lineHeightUnit:"PIXELS", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Subtitle",      figmaName:"Fluent/Subtitle",      fontSize:20, fontWeight:"Semi Bold",lineHeight:28,lineHeightUnit:"PIXELS", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Title",         figmaName:"Fluent/Title",         fontSize:28, fontWeight:"Semi Bold",lineHeight:36,lineHeightUnit:"PIXELS", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Title Large",   figmaName:"Fluent/Title Large",   fontSize:40, fontWeight:"Semi Bold",lineHeight:52,lineHeightUnit:"PIXELS", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Display",       figmaName:"Fluent/Display",       fontSize:68, fontWeight:"Semi Bold",lineHeight:92,lineHeightUnit:"PIXELS", letterSpacing:0, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+  ],
+};
+
+function buildDefault(family) {
+  return [
+    { name:"Display",    figmaName:"Display",    fontSize:64, fontWeight:"Bold",       lineHeight:110, lineHeightUnit:"PERCENT", letterSpacing:-1,   paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"H1",         figmaName:"H1",         fontSize:48, fontWeight:"Bold",       lineHeight:115, lineHeightUnit:"PERCENT", letterSpacing:-0.5, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"H2",         figmaName:"H2",         fontSize:40, fontWeight:"Bold",       lineHeight:120, lineHeightUnit:"PERCENT", letterSpacing:-0.5, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"H3",         figmaName:"H3",         fontSize:32, fontWeight:"Semi Bold",  lineHeight:125, lineHeightUnit:"PERCENT", letterSpacing:-0.25,paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"H4",         figmaName:"H4",         fontSize:28, fontWeight:"Semi Bold",  lineHeight:130, lineHeightUnit:"PERCENT", letterSpacing:-0.25,paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"H5",         figmaName:"H5",         fontSize:24, fontWeight:"Semi Bold",  lineHeight:130, lineHeightUnit:"PERCENT", letterSpacing:0,    paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"H6",         figmaName:"H6",         fontSize:20, fontWeight:"Medium",     lineHeight:135, lineHeightUnit:"PERCENT", letterSpacing:0,    paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Subtitle 1", figmaName:"Subtitle/1", fontSize:18, fontWeight:"Medium",     lineHeight:140, lineHeightUnit:"PERCENT", letterSpacing:0.15, paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Subtitle 2", figmaName:"Subtitle/2", fontSize:16, fontWeight:"Medium",     lineHeight:140, lineHeightUnit:"PERCENT", letterSpacing:0.1,  paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Body Large", figmaName:"Body/Large", fontSize:18, fontWeight:"Regular",    lineHeight:155, lineHeightUnit:"PERCENT", letterSpacing:0,    paragraphSpacing:4, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Body",       figmaName:"Body",       fontSize:16, fontWeight:"Regular",    lineHeight:155, lineHeightUnit:"PERCENT", letterSpacing:0,    paragraphSpacing:4, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Body Small", figmaName:"Body/Small", fontSize:14, fontWeight:"Regular",    lineHeight:150, lineHeightUnit:"PERCENT", letterSpacing:0.25, paragraphSpacing:4, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Caption",    figmaName:"Caption",    fontSize:12, fontWeight:"Regular",    lineHeight:145, lineHeightUnit:"PERCENT", letterSpacing:0.4,  paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+    { name:"Overline",   figmaName:"Overline",   fontSize:10, fontWeight:"Medium",     lineHeight:160, lineHeightUnit:"PERCENT", letterSpacing:1.5,  paragraphSpacing:0, textCase:"UPPER",    textDecoration:"NONE" },
+    { name:"Button",     figmaName:"Button",     fontSize:16, fontWeight:"Medium",     lineHeight:140, lineHeightUnit:"PERCENT", letterSpacing:0.5,  paragraphSpacing:0, textCase:"ORIGINAL", textDecoration:"NONE" },
+  ];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// State
+// ─────────────────────────────────────────────────────────────────────────────
+
+let state = {
+  fontFamily: "Inter",
+  availableFamilies: [],
+  fontWeights: [],
+  styles: [],
+  activePreset: "Default",
+  customPresets: {},
+  darkMode: false,
+  pendingImport: null,
+  filterQuery: "",
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Utilities
+// ─────────────────────────────────────────────────────────────────────────────
+
+function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+function uid() { return Math.random().toString(36).slice(2, 9); }
+
+function loadCustomPresets() {
+  try { return JSON.parse(localStorage.getItem("typomaker-presets") || "{}"); } catch { return {}; }
+}
+
+function saveCustomPresets(presets) {
+  localStorage.setItem("typomaker-presets", JSON.stringify(presets));
+}
+
+function toast(msg, type = "info", duration = 3000) {
+  const area = document.getElementById("toast-area");
+  const el = document.createElement("div");
+  el.className = `toast toast-${type}`;
+  el.textContent = msg;
+  area.appendChild(el);
+  setTimeout(() => el.remove(), duration);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Init
+// ─────────────────────────────────────────────────────────────────────────────
+
+function init() {
+  state.customPresets = loadCustomPresets();
+  if (localStorage.getItem("typomaker-dark") === "1") {
+    state.darkMode = true;
+    document.documentElement.classList.add("dark");
+    document.getElementById("btn-dark-toggle").textContent = "☾";
+  }
+
+  // Render table immediately with default font — don't wait for font list
+  loadStylesFromPreset("Default");
+  renderPresetList();
+  bindEvents();
+
+  // Load fonts in background
+  document.getElementById("font-loading").style.display = "block";
+  parent.postMessage({ pluginMessage: { type: "get-fonts" } }, "*");
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Preset helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+function allPresets() {
+  return Object.assign({}, PRESETS, state.customPresets);
+}
+
+function loadStylesFromPreset(name) {
+  const all = allPresets();
+  const base = all[name] ? deepClone(all[name]) : deepClone(PRESETS["Default"]);
+  state.styles = base.map(function(s) {
+    return Object.assign({}, s, { id: uid(), fontFamily: state.fontFamily, enabled: true });
+  });
+  state.activePreset = name;
+  renderTable();
+  renderPreviewBar();
+}
+
+function renderPresetList() {
+  const list = document.getElementById("preset-list");
+  list.innerHTML = "";
+  const all = allPresets();
+  Object.keys(all).forEach(name => {
+    const isCustom = !PRESETS[name];
+    const el = document.createElement("div");
+    el.className = "preset-item" + (state.activePreset === name ? " active" : "");
+    el.dataset.name = name;
+    el.innerHTML = `<span>${name}</span>${isCustom ? `<button class="icon-btn preset-del btn-sm" data-preset="${name}" title="Delete">✕</button>` : ""}`;
+    el.addEventListener("click", (e) => {
+      if (e.target.closest(".preset-del")) return;
+      loadStylesFromPreset(name);
+      renderPresetList();
+    });
+    const delBtn = el.querySelector(".preset-del");
+    if (delBtn) {
+      delBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        delete state.customPresets[name];
+        saveCustomPresets(state.customPresets);
+        if (state.activePreset === name) loadStylesFromPreset("Default");
+        renderPresetList();
+        toast(`Deleted preset "${name}"`, "info");
+      });
+    }
+    list.appendChild(el);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Table rendering
+// ─────────────────────────────────────────────────────────────────────────────
+
+const WEIGHT_OPTIONS = [
+  "Thin","Extra Light","Light","Regular","Medium","Semi Bold","Bold","Extra Bold","Black",
+  "100","200","300","400","500","600","700","800","900",
+  "Italic","Bold Italic","Medium Italic",
+];
+const TEXT_CASES = ["ORIGINAL","UPPER","LOWER","TITLE"];
+const TEXT_DECS  = ["NONE","UNDERLINE","STRIKETHROUGH"];
+
+function getFilteredStyles() {
+  const q = state.filterQuery.trim().toLowerCase();
+  if (!q) return state.styles;
+  return state.styles.filter(s => s.name.toLowerCase().includes(q) || s.figmaName.toLowerCase().includes(q));
+}
+
+function renderTable() {
+  const tbody = document.getElementById("typo-tbody");
+  const filtered = getFilteredStyles();
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr class="loading-row"><td colspan="8">No styles match your search.</td></tr>`;
+    updateCountLabel();
+    return;
+  }
+
+  tbody.innerHTML = "";
+  filtered.forEach(style => {
+    const tr = document.createElement("tr");
+    tr.dataset.id = style.id;
+    if (!style.enabled) tr.classList.add("disabled-row");
+    tr.innerHTML = buildRowHTML(style);
+    tbody.appendChild(tr);
+    bindRowEvents(tr, style);
+  });
+
+  document.getElementById("th-all-check").checked = filtered.every(s => s.enabled);
+  updateCountLabel();
+}
+
+function buildRowHTML(s) {
+  const weightOpts = WEIGHT_OPTIONS.map(w =>
+    `<option value="${w}" ${w === s.fontWeight ? "selected" : ""}>${w}</option>`
+  ).join("");
+
+  const lineHtDisplay = s.lineHeightUnit === "PIXELS" ? s.lineHeight + "px"
+    : s.lineHeightUnit === "PERCENT" ? s.lineHeight + "%" : "Auto";
+
+  const previewStyle = buildPreviewCSSStyle(s);
+
+  return `
+    <td class="cell-toggle">
+      <label class="toggle">
+        <input type="checkbox" class="row-toggle" ${s.enabled ? "checked" : ""}>
+        <span class="toggle-track"></span>
+        <span class="toggle-thumb"></span>
+      </label>
+    </td>
+    <td class="cell-name">
+      <input class="td-name-input row-name" type="text" value="${escHtml(s.name)}" title="Style name">
+      <div class="text-xs text-muted" style="margin-top:1px">${escHtml(s.figmaName)}</div>
+    </td>
+    <td class="cell-input">
+      <select class="td-select row-weight">${weightOpts}</select>
+    </td>
+    <td class="cell-input">
+      <input class="td-num-input row-size" type="number" min="1" max="400" step="1" value="${s.fontSize}">
+    </td>
+    <td class="cell-input">
+      <input class="td-num-input row-lh" type="text" value="${lineHtDisplay}" placeholder="e.g. 150% or 24px">
+    </td>
+    <td class="cell-input">
+      <input class="td-num-input row-ls" type="number" step="0.01" value="${s.letterSpacing}">
+    </td>
+    <td class="cell-preview">
+      <div class="preview-item">
+        <div class="row-preview-text" style="${previewStyle}">${escHtml(s.name)}</div>
+      </div>
+    </td>
+    <td class="cell-actions">
+      <button class="icon-btn row-del" title="Delete style">✕</button>
+    </td>
+  `;
+}
+
+function buildPreviewCSSStyle(s) {
+  const maxPx = Math.min(s.fontSize, 36);
+  let lhCss = "normal";
+  if (s.lineHeightUnit === "PIXELS") lhCss = s.lineHeight + "px";
+  else if (s.lineHeightUnit === "PERCENT") lhCss = (s.lineHeight / 100).toFixed(2);
+  return `font-family:'${s.fontFamily}',sans-serif;font-size:${maxPx}px;font-weight:${weightToCSS(s.fontWeight)};line-height:${lhCss};letter-spacing:${s.letterSpacing * 0.01}em;text-transform:${textCaseToCSS(s.textCase)};color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;display:block`;
+}
+
+function weightToCSS(w) {
+  const map = {"Thin":100,"Extra Light":200,"Light":300,"Regular":400,"Medium":500,"Semi Bold":600,"Bold":700,"Extra Bold":800,"Black":900};
+  return map[w] || w;
+}
+
+function textCaseToCSS(tc) {
+  const map = {"UPPER":"uppercase","LOWER":"lowercase","TITLE":"capitalize","ORIGINAL":"none"};
+  return map[tc] || "none";
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function parseLineHeight(str) {
+  str = str.trim();
+  if (str.endsWith("px")) {
+    const v = parseFloat(str);
+    return isNaN(v) ? null : { value: v, unit: "PIXELS" };
+  }
+  if (str.endsWith("%")) {
+    const v = parseFloat(str);
+    return isNaN(v) ? null : { value: v, unit: "PERCENT" };
+  }
+  const v = parseFloat(str);
+  if (!isNaN(v)) return { value: v, unit: "PERCENT" };
+  return null;
+}
+
+function bindRowEvents(tr, style) {
+  const getStyle = () => state.styles.find(s => s.id === style.id);
+
+  tr.querySelector(".row-toggle").addEventListener("change", e => {
+    getStyle().enabled = e.target.checked;
+    tr.classList.toggle("disabled-row", !e.target.checked);
+    document.getElementById("th-all-check").checked = getFilteredStyles().every(s => s.enabled);
+  });
+
+  tr.querySelector(".row-name").addEventListener("input", e => {
+    getStyle().name = e.target.value;
+    updatePreviewInRow(tr, getStyle());
+  });
+
+  tr.querySelector(".row-weight").addEventListener("change", e => {
+    getStyle().fontWeight = e.target.value;
+    updatePreviewInRow(tr, getStyle());
+  });
+
+  tr.querySelector(".row-size").addEventListener("input", e => {
+    const v = parseFloat(e.target.value);
+    if (!isNaN(v) && v > 0) {
+      getStyle().fontSize = v;
+      updatePreviewInRow(tr, getStyle());
+    }
+  });
+
+  tr.querySelector(".row-lh").addEventListener("blur", e => {
+    const parsed = parseLineHeight(e.target.value);
+    if (parsed) {
+      const s = getStyle();
+      s.lineHeight = parsed.value;
+      s.lineHeightUnit = parsed.unit;
+    }
+    e.target.value = buildLineHeightDisplay(getStyle());
+    updatePreviewInRow(tr, getStyle());
+  });
+
+  tr.querySelector(".row-ls").addEventListener("input", e => {
+    const v = parseFloat(e.target.value);
+    if (!isNaN(v)) {
+      getStyle().letterSpacing = v;
+      updatePreviewInRow(tr, getStyle());
+    }
+  });
+
+  tr.querySelector(".row-del").addEventListener("click", () => {
+    state.styles = state.styles.filter(s => s.id !== style.id);
+    renderTable();
+    renderPreviewBar();
+  });
+}
+
+function buildLineHeightDisplay(s) {
+  if (s.lineHeightUnit === "PIXELS") return s.lineHeight + "px";
+  if (s.lineHeightUnit === "PERCENT") return s.lineHeight + "%";
+  return "Auto";
+}
+
+function updatePreviewInRow(tr, style) {
+  const el = tr.querySelector(".row-preview-text");
+  if (el) {
+    el.style.cssText = buildPreviewCSSStyle(style);
+    el.textContent = style.name;
+  }
+  renderPreviewBar();
+}
+
+function updateCountLabel() {
+  const enabled = state.styles.filter(s => s.enabled).length;
+  document.getElementById("style-count-label").textContent =
+    `${state.styles.length} styles · ${enabled} enabled`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Preview bar
+// ─────────────────────────────────────────────────────────────────────────────
+
+function renderPreviewBar() {
+  const bar = document.getElementById("preview-bar");
+  const enabled = state.styles.filter(s => s.enabled);
+  if (!enabled.length) {
+    bar.innerHTML = `<span class="text-xs text-muted">No enabled styles</span>`;
+    return;
+  }
+  bar.innerHTML = enabled.map(s => {
+    const clamp = Math.min(s.fontSize, 42);
+    return `<div class="preview-item">
+      <div class="preview-label">${escHtml(s.name)}</div>
+      <div style="font-family:'${escHtml(s.fontFamily)}',sans-serif;font-size:${clamp}px;font-weight:${weightToCSS(s.fontWeight)};white-space:nowrap;color:var(--text);line-height:1.1">${escHtml(s.name)}</div>
+    </div>`;
+  }).join("");
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Font family selector
+// ─────────────────────────────────────────────────────────────────────────────
+
+let allFamilies = [];
+let fontRenderTimer = null;
+let fontDropdownOpen = false;
+
+function renderFontList(filter) {
+  const list = document.getElementById("font-list");
+  const lf = (filter || "").toLowerCase();
+  const shown = lf ? allFamilies.filter(function(f) { return f.toLowerCase().indexOf(lf) !== -1; }) : allFamilies;
+
+  if (shown.length === 0) {
+    list.innerHTML = '<div class="font-list-empty">No fonts found</div>';
+    return;
+  }
+
+  const frag = document.createDocumentFragment();
+  for (var i = 0; i < shown.length; i++) {
+    const item = document.createElement("div");
+    item.className = "font-list-item" + (shown[i] === state.fontFamily ? " selected" : "");
+    item.textContent = shown[i];
+    item.dataset.family = shown[i];
+    frag.appendChild(item);
+  }
+  list.innerHTML = "";
+  list.appendChild(frag);
+
+  // Scroll selected item into view
+  const sel = list.querySelector(".selected");
+  if (sel) sel.scrollIntoView({ block: "nearest" });
+}
+
+function openFontDropdown() {
+  document.getElementById("font-dropdown").classList.add("open");
+  document.getElementById("font-search").value = "";
+  renderFontList("");
+  setTimeout(function() { document.getElementById("font-search").focus(); }, 0);
+  fontDropdownOpen = true;
+}
+
+function closeFontDropdown() {
+  document.getElementById("font-dropdown").classList.remove("open");
+  fontDropdownOpen = false;
+}
+
+function selectFont(family) {
+  state.fontFamily = family;
+  document.getElementById("font-picker-input").value = family;
+  state.styles.forEach(function(s) { s.fontFamily = family; });
+  renderTable();
+  renderPreviewBar();
+  closeFontDropdown();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// JSON export / import
+// ─────────────────────────────────────────────────────────────────────────────
+
+function exportJSON() {
+  const data = {
+    version: "1.0",
+    fontFamily: state.fontFamily,
+    preset: state.activePreset,
+    styles: state.styles,
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "typomaker-export.json";
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("Exported typography JSON", "success");
+}
+
+function importJSON(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.styles || !Array.isArray(data.styles)) throw new Error("Invalid format");
+      state.styles = data.styles.map(function(s) { return Object.assign({}, s, { id: uid(), enabled: s.enabled !== false }); });
+      if (data.fontFamily) state.fontFamily = data.fontFamily;
+      renderTable();
+      renderPreviewBar();
+      toast("Imported typography settings", "success");
+    } catch (err) {
+      toast("Import failed: " + err.message, "error");
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Import flow
+// ─────────────────────────────────────────────────────────────────────────────
+
+function startImport() {
+  const enabled = state.styles.filter(s => s.enabled);
+  if (!enabled.length) { toast("No styles enabled to import", "error"); return; }
+
+  parent.postMessage({ pluginMessage: { type: "check-conflicts", styles: enabled } }, "*");
+}
+
+function doImport(conflictAction) {
+  const enabled = state.styles.filter(s => s.enabled);
+  parent.postMessage({
+    pluginMessage: {
+      type: "import-styles",
+      styles: enabled,
+      conflictAction,
+    }
+  }, "*");
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Event bindings
+// ─────────────────────────────────────────────────────────────────────────────
+
+function bindEvents() {
+
+  // Font picker — open/close dropdown
+  document.getElementById("font-picker-input").addEventListener("click", function() {
+    if (fontDropdownOpen) { closeFontDropdown(); } else { openFontDropdown(); }
+  });
+
+  // Font search inside dropdown
+  document.getElementById("font-search").addEventListener("input", function() {
+    clearTimeout(fontRenderTimer);
+    var val = this.value;
+    fontRenderTimer = setTimeout(function() { renderFontList(val); }, 100);
+  });
+
+  // Click a font in the list
+  document.getElementById("font-list").addEventListener("click", function(e) {
+    var item = e.target.closest(".font-list-item");
+    if (item) selectFont(item.dataset.family);
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener("click", function(e) {
+    if (fontDropdownOpen && !document.getElementById("font-picker").contains(e.target)) {
+      closeFontDropdown();
+    }
+  });
+
+  // Style search
+  document.getElementById("style-search").addEventListener("input", e => {
+    state.filterQuery = e.target.value;
+    renderTable();
+  });
+
+  // Dark mode
+  document.getElementById("btn-dark-toggle").addEventListener("click", () => {
+    state.darkMode = !state.darkMode;
+    document.documentElement.classList.toggle("dark", state.darkMode);
+    localStorage.setItem("typomaker-dark", state.darkMode ? "1" : "0");
+    document.getElementById("btn-dark-toggle").textContent = state.darkMode ? "☾" : "☀";
+  });
+
+  // Import button
+  document.getElementById("btn-import").addEventListener("click", startImport);
+
+  // Reset
+  document.getElementById("btn-reset").addEventListener("click", () => {
+    loadStylesFromPreset(state.activePreset);
+    toast("Reset to default values", "info");
+  });
+
+  // Select / Deselect all
+  document.getElementById("btn-select-all").addEventListener("click", () => {
+    state.styles.forEach(s => s.enabled = true);
+    renderTable();
+  });
+  document.getElementById("btn-deselect-all").addEventListener("click", () => {
+    state.styles.forEach(s => s.enabled = false);
+    renderTable();
+  });
+
+  // Header checkbox
+  document.getElementById("th-all-check").addEventListener("change", e => {
+    getFilteredStyles().forEach(s => {
+      const real = state.styles.find(r => r.id === s.id);
+      if (real) real.enabled = e.target.checked;
+    });
+    renderTable();
+  });
+
+  // Add style
+  document.getElementById("btn-add-style").addEventListener("click", () => {
+    state.styles.push({
+      id: uid(),
+      name: "New Style",
+      figmaName: "New Style",
+      fontFamily: state.fontFamily,
+      fontWeight: "Regular",
+      fontSize: 16,
+      lineHeight: 150,
+      lineHeightUnit: "PERCENT",
+      letterSpacing: 0,
+      paragraphSpacing: 0,
+      textCase: "ORIGINAL",
+      textDecoration: "NONE",
+      enabled: true,
+    });
+    renderTable();
+    renderPreviewBar();
+  });
+
+  // Apply scale
+  document.getElementById("btn-apply-scale").addEventListener("click", () => {
+    document.getElementById("scale-factor-input").value = "1";
+    document.getElementById("scale-modal").classList.add("open");
+  });
+  document.getElementById("scale-cancel").addEventListener("click", () => {
+    document.getElementById("scale-modal").classList.remove("open");
+  });
+  document.getElementById("scale-confirm").addEventListener("click", () => {
+    const factor = parseFloat(document.getElementById("scale-factor-input").value);
+    if (isNaN(factor) || factor <= 0) { toast("Invalid scale factor", "error"); return; }
+    state.styles.forEach(s => { s.fontSize = Math.round(s.fontSize * factor); });
+    document.getElementById("scale-modal").classList.remove("open");
+    renderTable();
+    renderPreviewBar();
+    toast(`Scaled all sizes by ${factor}×`, "success");
+  });
+
+  // Export JSON
+  document.getElementById("btn-export-json").addEventListener("click", exportJSON);
+
+  // Import JSON
+  document.getElementById("import-json-file").addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (file) importJSON(file);
+    e.target.value = "";
+  });
+
+  // Save preset
+  document.getElementById("btn-save-preset").addEventListener("click", () => {
+    document.getElementById("preset-name-input").value = "";
+    document.getElementById("preset-modal").classList.add("open");
+    setTimeout(() => document.getElementById("preset-name-input").focus(), 50);
+  });
+  document.getElementById("preset-modal-cancel").addEventListener("click", () => {
+    document.getElementById("preset-modal").classList.remove("open");
+  });
+  document.getElementById("preset-modal-confirm").addEventListener("click", () => {
+    const name = document.getElementById("preset-name-input").value.trim();
+    if (!name) { toast("Enter a preset name", "error"); return; }
+    state.customPresets[name] = deepClone(state.styles).map(function(s) {
+      const rest = Object.assign({}, s);
+      delete rest.id; delete rest.fontFamily; delete rest.enabled;
+      return rest;
+    });
+    saveCustomPresets(state.customPresets);
+    state.activePreset = name;
+    renderPresetList();
+    document.getElementById("preset-modal").classList.remove("open");
+    toast(`Saved preset "${name}"`, "success");
+  });
+
+  // Conflict modal
+  document.getElementById("conflict-cancel").addEventListener("click", () => {
+    document.getElementById("conflict-modal").classList.remove("open");
+  });
+  document.getElementById("conflict-confirm").addEventListener("click", () => {
+    const action = document.querySelector('input[name="conflict"]:checked').value;
+    document.getElementById("conflict-modal").classList.remove("open");
+    doImport(action);
+  });
+
+  // Close modals on overlay click
+  ["conflict-modal","preset-modal","scale-modal"].forEach(id => {
+    document.getElementById(id).addEventListener("click", e => {
+      if (e.target.id === id) document.getElementById(id).classList.remove("open");
+    });
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Message handler (from plugin backend)
+// ─────────────────────────────────────────────────────────────────────────────
+
+window.onmessage = (event) => {
+  const msg = event.data.pluginMessage;
+  if (!msg) return;
+
+  switch (msg.type) {
+
+    case "fonts-list": {
+      allFamilies = msg.families;
+      document.getElementById("font-loading").style.display = "none";
+
+      // Pick best default: keep Inter if available, else first in list
+      if (allFamilies.indexOf(state.fontFamily) === -1) {
+        state.fontFamily = allFamilies[0] || "Inter";
+      }
+
+      // Show selected font in picker input
+      document.getElementById("font-picker-input").value = state.fontFamily;
+      document.getElementById("font-picker-input").placeholder = "Select font…";
+
+      // Update styles with resolved font and re-render
+      state.styles.forEach(function(s) { s.fontFamily = state.fontFamily; });
+      renderTable();
+      renderPreviewBar();
+      break;
+    }
+
+    case "conflict-check-result": {
+      const conflicts = msg.conflicts;
+      if (conflicts.length === 0) {
+        doImport("replace");
+      } else {
+        const list = document.getElementById("conflict-list");
+        list.innerHTML = conflicts.slice(0, 10).map(c => `<li>${escHtml(c)}</li>`).join("");
+        if (conflicts.length > 10) {
+          list.innerHTML += `<li>…and ${conflicts.length - 10} more</li>`;
+        }
+        document.getElementById("conflict-modal").classList.add("open");
+      }
+      break;
+    }
+
+    case "import-complete": {
+      const { created, replaced, skipped, errors } = msg.results;
+      const parts = [];
+      if (created)   parts.push(`${created} created`);
+      if (replaced)  parts.push(`${replaced} replaced`);
+      if (skipped)   parts.push(`${skipped} skipped`);
+      if (errors.length) parts.push(`${errors.length} failed`);
+
+      const summary = parts.join(", ");
+      if (errors.length) {
+        toast(`Import complete: ${summary}`, "error", 5000);
+        console.warn("Import errors:", errors);
+      } else {
+        toast(`Import complete: ${summary}`, "success");
+      }
+      break;
+    }
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Boot
+// ─────────────────────────────────────────────────────────────────────────────
+
+init();
+</script>
+</body>
+</html>
