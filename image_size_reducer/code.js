@@ -1,4 +1,4 @@
-figma.showUI(__html__, { width: 400, height: 580, title: "Image Size Reducer" });
+figma.showUI(__html__, { width: 400, height: 420, title: "Image Size Reducer" });
 
 function getSelectionInfo() {
   const selection = figma.currentPage.selection;
@@ -34,7 +34,7 @@ figma.ui.onmessage = async (msg) => {
       figma.ui.postMessage({ type: "progress", message: "Exporting from Figma..." });
 
       const bytes = await node.exportAsync({
-        format: format === "JPEG" ? "JPG" : "PNG",
+        format: "PNG",  // UI handles JPEG/WebP re-encoding with quality binary search
         constraint: { type: "SCALE", value: scale },
       });
 
@@ -49,6 +49,10 @@ figma.ui.onmessage = async (msg) => {
     } catch (err) {
       figma.ui.postMessage({ type: "error", message: err.message || "Export failed." });
     }
+  }
+
+  if (msg.type === "resize") {
+    figma.ui.resize(400, Math.min(Math.max(msg.height, 200), 700));
   }
 
   if (msg.type === "close") {
