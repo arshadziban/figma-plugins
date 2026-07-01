@@ -104,6 +104,17 @@
     .empty-state strong { color: var(--text-sub); font-weight: 500; }
 
     /* ── Node list ──────────────────────────────────────────── */
+    .node-list-header {
+      display: flex; justify-content: flex-end;
+      margin-bottom: 6px;
+    }
+    .select-all-btn {
+      font-size: 10px; font-weight: 600; color: var(--accent2);
+      background: none; border: none; cursor: pointer; padding: 2px 0;
+      letter-spacing: 0.02em;
+    }
+    .select-all-btn:hover { color: var(--accent); }
+
     .node-list { display: flex; flex-direction: column; gap: 5px; }
     .node-item {
       display: flex; align-items: center; gap: 9px;
@@ -384,6 +395,55 @@
     }
     .btn-ghost:hover { border-color: var(--border-light); color: var(--text); }
     .btn-ghost svg { width: 12px; height: 12px; }
+
+    /* ── Batch results ──────────────────────────────────────── */
+    .batch-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .btn-download-all {
+      padding: 6px 12px;
+      border: none; border-radius: var(--radius-xs);
+      background: var(--success); color: #0a1f14;
+      font-size: 11px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; gap: 5px;
+      transition: filter 0.12s;
+      box-shadow: 0 1px 6px rgba(52,211,153,0.2);
+    }
+    .btn-download-all:hover { filter: brightness(1.08); }
+    .btn-download-all svg { width: 11px; height: 11px; }
+
+    .batch-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 5px;
+    }
+    .batch-item:last-child { margin-bottom: 0; }
+    .batch-item-info { flex: 1; min-width: 0; }
+    .batch-item-name {
+      font-size: 11px; font-weight: 600; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .batch-item-sizes { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+    .batch-item-savings { font-weight: 700; color: var(--success); }
+    .btn-dl-sm {
+      padding: 5px 10px;
+      border: none; border-radius: var(--radius-xs);
+      background: var(--surface3); color: var(--text-sub);
+      border: 1px solid var(--border);
+      font-size: 10px; font-weight: 700; cursor: pointer;
+      flex-shrink: 0;
+      transition: border-color 0.12s, color 0.12s, background 0.12s;
+      white-space: nowrap;
+    }
+    .btn-dl-sm:hover {
+      border-color: var(--success);
+      color: var(--success);
+      background: var(--success-bg);
+    }
   </style>
 </head>
 <body>
@@ -447,11 +507,14 @@
 
   <div class="presets">
     <span class="preset-lbl">Quick:</span>
-    <button class="preset-btn" data-kb="100">100 KB</button>
+    <button class="preset-btn" data-kb="150">150 KB</button>
     <button class="preset-btn" data-kb="200">200 KB</button>
+    <button class="preset-btn" data-kb="250">250 KB</button>
+    <button class="preset-btn" data-kb="300">300 KB</button>
+    <button class="preset-btn" data-kb="350">350 KB</button>
+    <button class="preset-btn" data-kb="400">400 KB</button>
+    <button class="preset-btn" data-kb="450">450 KB</button>
     <button class="preset-btn" data-kb="500">500 KB</button>
-    <button class="preset-btn" data-kb="1024">1 MB</button>
-    <button class="preset-btn" data-kb="2048">2 MB</button>
   </div>
 </div>
 
@@ -467,10 +530,10 @@
     <path d="M7 1v8M4 6l3 3 3-3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     <path d="M2 10.5v1a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5v-1" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
   </svg>
-  Compress to Target Size
+  <span id="exportBtnText">Compress to Target Size</span>
 </button>
 
-<!-- Result -->
+<!-- Single Result -->
 <div class="output-section" id="outputSection">
   <div class="card" style="margin-top:8px;">
     <div class="section-label">Result</div>
@@ -527,12 +590,43 @@
   </div>
 </div>
 
+<!-- Batch Results -->
+<div class="output-section" id="batchOutputSection">
+  <div class="card" style="margin-top:8px;">
+    <div class="batch-header">
+      <div class="section-label" style="margin-bottom:0">Results</div>
+      <button class="btn-download-all" id="downloadAllBtn">
+        <svg viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6.5 1v7M4 5.5l2.5 2.5L9 5.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M1.5 10v.5a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        Download All
+      </button>
+    </div>
+    <div id="batchResultList"></div>
+    <button class="btn-ghost" id="batchReExportBtn" style="margin-top:8px;">
+      <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 6a4 4 0 1 1 4 4H4m-2 0 2-2m-2 2 2 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Export another
+    </button>
+  </div>
+</div>
+
 <script>
-  let selectedNodeId = null;
-  let selectedFormat = "JPEG";
-  let selectedUnit   = "KB";
-  let downloadUrl    = null;
-  let downloadName   = "";
+  let selectedNodeIds = new Set();
+  let selectedFormat  = "JPEG";
+  let selectedUnit    = "KB";
+  let currentNodes    = [];
+
+  // batch processing state
+  let pendingExports = [];
+  let batchResults   = [];
+  let totalToExport  = 0;
+
+  // single-image download
+  let downloadUrl  = null;
+  let downloadName = "";
 
   // ── Messages from plugin ──────────────────────────────────────
   window.onmessage = (ev) => {
@@ -547,7 +641,8 @@
   // ── Selection ─────────────────────────────────────────────────
   function renderSelection(nodes) {
     const area = document.getElementById("selectionArea");
-    selectedNodeId = null;
+    selectedNodeIds.clear();
+    currentNodes = nodes || [];
     updateBtn();
 
     if (!nodes || nodes.length === 0) {
@@ -565,9 +660,11 @@
       return;
     }
 
-    area.innerHTML = `<div class="node-list" id="nodeList"></div>`;
-    const list = document.getElementById("nodeList");
+    area.innerHTML = `
+      ${nodes.length > 1 ? `<div class="node-list-header"><button class="select-all-btn" id="selectAllBtn">Select All</button></div>` : ''}
+      <div class="node-list" id="nodeList"></div>`;
 
+    const list = document.getElementById("nodeList");
     nodes.forEach(n => {
       const el = document.createElement("div");
       el.className = "node-item";
@@ -587,18 +684,45 @@
         <div class="check-ring">
           <svg viewBox="0 0 8 8" fill="none"><path d="M1.5 4l2 2 3-3" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>`;
-      el.addEventListener("click", () => selectNode(n.id));
+      el.addEventListener("click", () => toggleNode(n.id));
       list.appendChild(el);
     });
 
-    if (nodes.length === 1) selectNode(nodes[0].id);
+    const saBtn = document.getElementById("selectAllBtn");
+    if (saBtn) saBtn.addEventListener("click", toggleSelectAll);
+
+    if (nodes.length === 1) toggleNode(nodes[0].id);
   }
 
-  function selectNode(id) {
-    selectedNodeId = id;
+  function toggleNode(id) {
+    if (selectedNodeIds.has(id)) {
+      selectedNodeIds.delete(id);
+    } else {
+      selectedNodeIds.add(id);
+    }
     document.querySelectorAll(".node-item").forEach(el =>
-      el.classList.toggle("selected", el.dataset.id === id));
+      el.classList.toggle("selected", selectedNodeIds.has(el.dataset.id)));
+    updateSelectAllBtn();
     updateBtn();
+  }
+
+  function toggleSelectAll() {
+    if (selectedNodeIds.size === currentNodes.length) {
+      selectedNodeIds.clear();
+    } else {
+      currentNodes.forEach(n => selectedNodeIds.add(n.id));
+    }
+    document.querySelectorAll(".node-item").forEach(el =>
+      el.classList.toggle("selected", selectedNodeIds.has(el.dataset.id)));
+    updateSelectAllBtn();
+    updateBtn();
+  }
+
+  function updateSelectAllBtn() {
+    const btn = document.getElementById("selectAllBtn");
+    if (!btn) return;
+    btn.textContent = (selectedNodeIds.size === currentNodes.length && currentNodes.length > 0)
+      ? "Deselect All" : "Select All";
   }
 
   // ── Format ────────────────────────────────────────────────────
@@ -646,41 +770,69 @@
       b.classList.toggle("active", b.dataset.unit === u));
   }
 
-  // ── Export trigger ────────────────────────────────────────────
+  // ── Button state ──────────────────────────────────────────────
   function updateBtn() {
-    document.getElementById("exportBtn").disabled = !selectedNodeId;
+    const n = selectedNodeIds.size;
+    document.getElementById("exportBtn").disabled = n === 0;
+    document.getElementById("exportBtnText").textContent = n > 1
+      ? `Compress ${n} Images`
+      : "Compress to Target Size";
   }
+
   function setBtnEnabled(v) {
     document.getElementById("exportBtn").disabled = !v;
   }
 
+  // ── Export trigger ────────────────────────────────────────────
   document.getElementById("exportBtn").addEventListener("click", () => {
-    if (!selectedNodeId) return;
+    if (selectedNodeIds.size === 0) return;
     const raw = parseFloat(document.getElementById("targetSizeInput").value);
     if (!raw || raw <= 0) { showStatus("error", "Please enter a valid target size."); return; }
 
     setBtnEnabled(false);
     document.getElementById("outputSection").classList.remove("visible");
-    showStatus("loading", "Exporting from Figma…");
+    document.getElementById("batchOutputSection").classList.remove("visible");
 
+    pendingExports = [...selectedNodeIds];
+    totalToExport  = pendingExports.length;
+    batchResults   = [];
+
+    const n = totalToExport;
+    showStatus("loading", `Exporting ${n} image${n > 1 ? 's' : ''}…`);
+    processNextExport();
+  });
+
+  function processNextExport() {
+    const current = batchResults.length + 1;
+    if (totalToExport > 1) {
+      showStatus("loading", `Exporting image ${current} of ${totalToExport}…`);
+    } else {
+      showStatus("loading", "Exporting from Figma…");
+    }
+    const nodeId = pendingExports.shift();
     parent.postMessage({ pluginMessage: {
       type: "export",
-      nodeId: selectedNodeId,
+      nodeId,
       format: selectedFormat,
       scale: 1,
     }}, "*");
-  });
+  }
 
   // ── Handle exported bytes ─────────────────────────────────────
   async function handleExported(msg) {
     const { bytes, name, format } = msg;
     const uint8     = new Uint8Array(bytes);
     const origBytes = uint8.length;
+    const current   = batchResults.length + 1;
 
     const raw         = parseFloat(document.getElementById("targetSizeInput").value) || 500;
     const targetBytes = Math.round(raw * (selectedUnit === "MB" ? 1048576 : 1024));
 
-    showStatus("loading", "Compressing…");
+    if (totalToExport > 1) {
+      showStatus("loading", `Compressing ${current} of ${totalToExport}: ${name}…`);
+    } else {
+      showStatus("loading", "Compressing…");
+    }
 
     const srcBlob = new Blob([uint8], { type: "image/png" });
     const srcUrl  = URL.createObjectURL(srcBlob);
@@ -692,7 +844,6 @@
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext("2d");
     if (format === "JPEG") {
-      // JPEG has no alpha channel — fill white so transparent areas don't go black
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, W, H);
     }
@@ -700,37 +851,103 @@
 
     const mime  = format === "JPEG" ? "image/jpeg" : "image/webp";
     const label = format === "JPEG" ? "JPEG" : "WebP";
-    showStatus("loading", `Finding optimal ${label} quality…`);
+
+    if (totalToExport > 1) {
+      showStatus("loading", `Finding quality for ${current} of ${totalToExport}…`);
+    } else {
+      showStatus("loading", `Finding optimal ${label} quality…`);
+    }
+
     const r = await qualityBinarySearch(canvas, mime, targetBytes);
-
-    const qualityNote = r.unreachable
-      ? "⚠ Target too small — minimum quality used"
-      : r.quality >= 1.0
-        ? "✓ No quality loss"
-        : `⚠ Quality reduced to ${Math.round(r.quality * 100)}%`;
-
-    if (downloadUrl) URL.revokeObjectURL(downloadUrl);
-    downloadUrl  = URL.createObjectURL(r.blob);
-    downloadName = `${sanitize(name)}.${format === "JPEG" ? "jpg" : "webp"}`;
 
     const compBytes = r.blob.size;
     const saved     = Math.max(0, Math.round((1 - compBytes / origBytes) * 100));
-    const ratio     = Math.min(1, compBytes / origBytes);
+    const blobUrl   = URL.createObjectURL(r.blob);
+    const filename  = `${sanitize(name)}.${format === "JPEG" ? "jpg" : "webp"}`;
 
-    document.getElementById("previewImg").src      = downloadUrl;
+    batchResults.push({
+      name, origBytes, compBytes, blob: r.blob, blobUrl, filename,
+      width: W, height: H, quality: r.quality, unreachable: r.unreachable, saved, label,
+    });
+
+    if (pendingExports.length > 0) {
+      processNextExport();
+    } else {
+      showResults();
+    }
+  }
+
+  // ── Show results ──────────────────────────────────────────────
+  function showResults() {
+    setBtnEnabled(true);
+    if (batchResults.length === 1) {
+      showSingleResult(batchResults[0]);
+    } else {
+      showBatchResults();
+    }
+  }
+
+  function showSingleResult(res) {
+    const { origBytes, compBytes, blobUrl, filename, width, height, saved, quality, unreachable, label } = res;
+
+    const qualityNote = unreachable
+      ? "⚠ Target too small — minimum quality used"
+      : quality >= 1.0
+        ? "✓ No quality loss"
+        : `⚠ Quality reduced to ${Math.round(quality * 100)}%`;
+
+    if (downloadUrl) URL.revokeObjectURL(downloadUrl);
+    downloadUrl  = blobUrl;
+    downloadName = filename;
+
+    const ratio = Math.min(1, compBytes / origBytes);
+    document.getElementById("previewImg").src = blobUrl;
     document.getElementById("origSizeVal").textContent = fmtBytes(origBytes);
     document.getElementById("compSizeVal").textContent = fmtBytes(compBytes);
     document.getElementById("barOrig").style.width = "100%";
     document.getElementById("barComp").style.width = Math.round(ratio * 100) + "%";
     document.getElementById("savedBadge").querySelector("span").textContent =
       saved > 0 ? `${saved}% smaller` : "Already optimal";
-    document.getElementById("compDims").textContent = `${W} × ${H}`;
+    document.getElementById("compDims").textContent = `${width} × ${height}`;
     document.getElementById("compFmt").textContent  = label;
     document.getElementById("qualityNote").textContent = qualityNote;
 
     document.getElementById("outputSection").classList.add("visible");
     showStatus("success", `Done — ${fmtBytes(compBytes)}${saved > 0 ? `, saved ${saved}%` : ""}.`);
-    setBtnEnabled(true);
+  }
+
+  function showBatchResults() {
+    const totalOrig = batchResults.reduce((s, r) => s + r.origBytes, 0);
+    const totalComp = batchResults.reduce((s, r) => s + r.compBytes, 0);
+    const totalSaved = Math.max(0, Math.round((1 - totalComp / totalOrig) * 100));
+
+    const list = document.getElementById("batchResultList");
+    list.innerHTML = "";
+
+    batchResults.forEach((res, i) => {
+      const item = document.createElement("div");
+      item.className = "batch-item";
+      item.innerHTML = `
+        <div class="batch-item-info">
+          <div class="batch-item-name">${esc(res.name)}</div>
+          <div class="batch-item-sizes">
+            ${fmtBytes(res.origBytes)} <span style="color:var(--border-light)">→</span> <span style="color:var(--success)">${fmtBytes(res.compBytes)}</span>${res.saved > 0 ? `<span class="batch-item-savings"> −${res.saved}%</span>` : ''}
+          </div>
+        </div>
+        <button class="btn-dl-sm" data-idx="${i}">Save</button>`;
+      list.appendChild(item);
+    });
+
+    list.querySelectorAll(".btn-dl-sm").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const res = batchResults[parseInt(btn.dataset.idx)];
+        triggerDownload(res.blobUrl, res.filename);
+      });
+    });
+
+    document.getElementById("batchOutputSection").classList.add("visible");
+    showStatus("success",
+      `${batchResults.length} images done — ${fmtBytes(totalComp)} total${totalSaved > 0 ? `, saved ${totalSaved}%` : ""}.`);
   }
 
   // ── Quality binary search ─────────────────────────────────────
@@ -788,27 +1005,145 @@
     return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   }
 
+  function triggerDownload(url, name) {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
   // ── Download / reset ──────────────────────────────────────────
   document.getElementById("downloadBtn").addEventListener("click", () => {
     if (!downloadUrl) return;
-    const a = document.createElement("a");
-    a.href = downloadUrl; a.download = downloadName; a.click();
+    triggerDownload(downloadUrl, downloadName);
   });
 
-  document.getElementById("reExportBtn").addEventListener("click", () => {
-    document.getElementById("outputSection").classList.remove("visible");
-    document.getElementById("status").className = "status";
-    fitWindow();
+  document.getElementById("downloadAllBtn").addEventListener("click", async function() {
+    const btn   = document.getElementById("downloadAllBtn");
+    const svgDl = `<svg viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.5 1v7M4 5.5l2.5 2.5L9 5.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M1.5 10v.5a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`;
+    btn.disabled = true;
+    btn.innerHTML = svgDl + " Zipping…";
+    try {
+      const files = await Promise.all(
+        batchResults.map(async r => ({
+          name: r.filename,
+          data: new Uint8Array(await r.blob.arrayBuffer()),
+        }))
+      );
+      const zipBytes = buildZip(files);
+      const zipUrl   = URL.createObjectURL(new Blob([zipBytes], { type: "application/zip" }));
+      triggerDownload(zipUrl, "compressed_images.zip");
+      URL.revokeObjectURL(zipUrl);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = svgDl + " Download All";
+    }
   });
+
+  function resetToExport() {
+    document.getElementById("outputSection").classList.remove("visible");
+    document.getElementById("batchOutputSection").classList.remove("visible");
+    document.getElementById("status").className = "status";
+    batchResults.forEach(r => URL.revokeObjectURL(r.blobUrl));
+    batchResults = [];
+    if (downloadUrl) { URL.revokeObjectURL(downloadUrl); downloadUrl = null; }
+    fitWindow();
+  }
+
+  document.getElementById("reExportBtn").addEventListener("click", resetToExport);
+  document.getElementById("batchReExportBtn").addEventListener("click", resetToExport);
 
   function fitWindow() {
     const h = document.body.scrollHeight;
     parent.postMessage({ pluginMessage: { type: "resize", height: h } }, "*");
   }
 
-  // Fit on load and after any DOM change that affects height
   window.addEventListener("load", fitWindow);
   new MutationObserver(fitWindow).observe(document.body, { subtree: true, childList: true, attributes: true });
+
+  // ── ZIP builder (no external deps) ───────────────────────────
+  function crc32(buf) {
+    let c = 0xFFFFFFFF;
+    for (let i = 0; i < buf.length; i++) {
+      c ^= buf[i];
+      for (let j = 0; j < 8; j++) c = (c >>> 1) ^ (c & 1 ? 0xEDB88320 : 0);
+    }
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  function buildZip(files) {
+    const enc = new TextEncoder();
+    const locals = [];
+    let offset = 0;
+
+    for (const f of files) {
+      const name = enc.encode(f.name);
+      const crc  = crc32(f.data);
+      const lh   = new Uint8Array(30 + name.length);
+      const dv   = new DataView(lh.buffer);
+      dv.setUint32(0,  0x04034b50, true); // local file sig
+      dv.setUint16(4,  20, true);          // version needed
+      dv.setUint16(6,  0,  true);          // flags
+      dv.setUint16(8,  0,  true);          // compression: store
+      dv.setUint16(10, 0,  true);          // mod time
+      dv.setUint16(12, 0,  true);          // mod date
+      dv.setUint32(14, crc, true);
+      dv.setUint32(18, f.data.length, true);
+      dv.setUint32(22, f.data.length, true);
+      dv.setUint16(26, name.length, true);
+      dv.setUint16(28, 0, true);           // extra length
+      lh.set(name, 30);
+      locals.push({ lh, data: f.data, name, crc, offset });
+      offset += lh.length + f.data.length;
+    }
+
+    const cdStart = offset;
+    const cds = locals.map(f => {
+      const cd = new Uint8Array(46 + f.name.length);
+      const dv = new DataView(cd.buffer);
+      dv.setUint32(0,  0x02014b50, true); // central dir sig
+      dv.setUint16(4,  20, true);
+      dv.setUint16(6,  20, true);
+      dv.setUint16(8,  0,  true);
+      dv.setUint16(10, 0,  true);
+      dv.setUint16(12, 0,  true);
+      dv.setUint16(14, 0,  true);
+      dv.setUint32(16, f.crc, true);
+      dv.setUint32(20, f.data.length, true);
+      dv.setUint32(24, f.data.length, true);
+      dv.setUint16(28, f.name.length, true);
+      dv.setUint16(30, 0, true);
+      dv.setUint16(32, 0, true);
+      dv.setUint16(34, 0, true);
+      dv.setUint16(36, 0, true);
+      dv.setUint32(38, 0, true);
+      dv.setUint32(42, f.offset, true);
+      cd.set(f.name, 46);
+      return cd;
+    });
+
+    const cdSize = cds.reduce((s, c) => s + c.length, 0);
+    const eocd   = new Uint8Array(22);
+    const ev     = new DataView(eocd.buffer);
+    ev.setUint32(0,  0x06054b50, true); // EOCD sig
+    ev.setUint16(4,  0, true);
+    ev.setUint16(6,  0, true);
+    ev.setUint16(8,  locals.length, true);
+    ev.setUint16(10, locals.length, true);
+    ev.setUint32(12, cdSize, true);
+    ev.setUint32(16, cdStart, true);
+    ev.setUint16(20, 0, true);
+
+    const parts = [...locals.flatMap(f => [f.lh, f.data]), ...cds, eocd];
+    const total = parts.reduce((s, p) => s + p.length, 0);
+    const out   = new Uint8Array(total);
+    let pos = 0;
+    for (const p of parts) { out.set(p, pos); pos += p.length; }
+    return out;
+  }
 </script>
 </body>
 </html>
