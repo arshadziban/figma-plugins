@@ -20,20 +20,16 @@ figma.ui.onmessage = function (msg) {
       return;
     }
 
-    var CONTAINERS = {
-      FRAME: true, GROUP: true, COMPONENT: true,
-      COMPONENT_SET: true, INSTANCE: true, SECTION: true,
-      BOOLEAN_OPERATION: true
-    };
-
     var textNodes = [];
+    var visitedCount = 0;
 
     function collect(node) {
+      visitedCount++;
       if (node.type === "TEXT") {
         textNodes.push(node);
         return;
       }
-      if (CONTAINERS[node.type] && node.children) {
+      if (node.children) {
         for (var i = 0; i < node.children.length; i++) {
           collect(node.children[i]);
         }
@@ -46,12 +42,15 @@ figma.ui.onmessage = function (msg) {
 
     // No text nodes found — rename the selected layers instead
     if (textNodes.length === 0) {
+      var seenTypes = {};
+      var typeList = [];
       for (var i = 0; i < nodes.length; i++) {
+        if (!seenTypes[nodes[i].type]) { seenTypes[nodes[i].type] = true; typeList.push(nodes[i].type); }
         nodes[i].name = slug;
       }
       figma.ui.postMessage({
         type: "success",
-        text: "Renamed " + nodes.length + " layer" + (nodes.length > 1 ? "s" : "") + " to \"" + slug + "\"."
+        text: "No text layers found inside [" + typeList.join(", ") + "] (" + visitedCount + " nodes scanned). Renamed " + nodes.length + " layer" + (nodes.length > 1 ? "s" : "") + " to \"" + slug + "\"."
       });
       return;
     }
