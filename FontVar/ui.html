@@ -142,7 +142,7 @@
 <div class="app">
   <div>
     <div class="title">FontVar</div>
-    <div class="subtitle">Pick a font and size, save as variables</div>
+    <div class="subtitle">Pick a font and size, save as a text style</div>
   </div>
 
   <div class="field">
@@ -164,12 +164,17 @@
     <input type="number" id="font-size-input" value="16" min="1" max="1000" step="1">
   </div>
 
+  <div class="field">
+    <div class="label">Style Name</div>
+    <input type="text" id="style-name-input" value="New Style" placeholder="e.g. Body/Regular">
+  </div>
+
   <div class="preview" id="preview">
     <span class="preview-text" id="preview-text">The quick brown fox</span>
   </div>
 
   <div class="field" style="gap:8px">
-    <button class="btn btn-primary" id="btn-done">Done — Save as Variable</button>
+    <button class="btn btn-primary" id="btn-done">Done — Save as Text Style</button>
     <div class="status" id="status"></div>
   </div>
 </div>
@@ -267,12 +272,14 @@ document.getElementById("font-size-input").addEventListener("input", updatePrevi
 
 document.getElementById("btn-done").addEventListener("click", () => {
   const fontSize = parseFloat(document.getElementById("font-size-input").value);
+  const styleName = document.getElementById("style-name-input").value.trim();
   if (!selectedFamily) { setStatus("Select a font first", "error"); return; }
   if (isNaN(fontSize) || fontSize <= 0) { setStatus("Enter a valid font size", "error"); return; }
+  if (!styleName) { setStatus("Enter a style name", "error"); return; }
 
   document.getElementById("btn-done").disabled = true;
   setStatus("Saving…");
-  parent.postMessage({ pluginMessage: { type: "save-variable", fontFamily: selectedFamily, fontSize } }, "*");
+  parent.postMessage({ pluginMessage: { type: "save-style", fontFamily: selectedFamily, fontSize, styleName } }, "*");
 });
 
 window.onmessage = (event) => {
@@ -294,7 +301,8 @@ window.onmessage = (event) => {
     }
 
     case "save-complete": {
-      setStatus(`Saved "${msg.fontFamily}" @ ${msg.fontSize}px to "${msg.collection}"`, "success");
+      const action = msg.created ? "Created" : "Updated";
+      setStatus(`${action} text style "${msg.styleName}" (${msg.fontFamily} @ ${msg.fontSize}px)`, "success");
       document.getElementById("btn-done").disabled = false;
       break;
     }
