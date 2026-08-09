@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FontVar</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --bg2: #f5f5f5;
+    --border: #e0e0e0;
+    --text: #1a1a1a;
+    --text2: #666666;
+    --text3: #999999;
+    --accent: #7c5cbf;
+    --accent-light: #ede9f8;
+    --accent-hover: #6a4caa;
+    --success: #18a058;
+    --error: #d03050;
+    --radius: 6px;
+    --radius-sm: 4px;
+    --transition: .15s ease;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1e1e1e;
+      --bg2: #2a2a2a;
+      --border: #3a3a3a;
+      --text: #f0f0f0;
+      --text2: #aaaaaa;
+      --text3: #666666;
+      --accent: #9d7fe0;
+      --accent-light: #2d2540;
+      --accent-hover: #b49ae8;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+    font-size: 12px;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .app { display: flex; flex-direction: column; height: 100vh; padding: 16px; gap: 16px; }
+
+  .title { font-size: 14px; font-weight: 700; }
+  .subtitle { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .label { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; }
+
+  input, select {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 12px;
+    outline: none;
+    height: 34px;
+    padding: 0 10px;
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+  input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-light); }
+
+  /* Font picker */
+  .font-picker { position: relative; }
+  .font-picker-input { width: 100%; padding-right: 28px; cursor: pointer; }
+  .font-picker-arrow {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    color: var(--text3); pointer-events: none; font-size: 9px;
+  }
+  .font-dropdown {
+    display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: 0 4px 16px rgba(0,0,0,.15);
+    z-index: 50; flex-direction: column;
+  }
+  .font-dropdown.open { display: flex; }
+  .font-search-box { padding: 6px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .font-search-box input { width: 100%; height: 30px; }
+  .font-list { overflow-y: auto; max-height: 220px; }
+  .font-list-item {
+    padding: 8px 12px; font-size: 13px; cursor: pointer; color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    transition: background var(--transition);
+  }
+  .font-list-item:hover { background: var(--bg2); }
+  .font-list-item.selected { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+  .font-list-empty { padding: 12px; font-size: 11px; color: var(--text3); text-align: center; }
+
+  /* Preview */
+  .preview {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    overflow: hidden;
+    min-height: 100px;
+  }
+  .preview-text {
+    color: var(--text);
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Button */
+  .btn {
+    border: none; cursor: pointer; font-family: inherit;
+    font-size: 12px; font-weight: 600;
+    border-radius: var(--radius-sm);
+    height: 36px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    transition: background var(--transition), opacity var(--transition);
+    width: 100%;
+  }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+
+  .status { font-size: 10px; color: var(--text3); text-align: center; min-height: 14px; }
+  .status.success { color: var(--success); }
+  .status.error { color: var(--error); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div>
+    <div class="title">FontVar</div>
+    <div class="subtitle">Pick a font and size, save as variables</div>
+  </div>
+
+  <div class="field">
+    <div class="label">Font Family</div>
+    <div class="font-picker" id="font-picker">
+      <input class="font-picker-input" id="font-picker-input" type="text" readonly placeholder="Loading fonts…" autocomplete="off">
+      <span class="font-picker-arrow">▼</span>
+      <div class="font-dropdown" id="font-dropdown">
+        <div class="font-search-box">
+          <input type="text" id="font-search" placeholder="Search fonts…" autocomplete="off">
+        </div>
+        <div class="font-list" id="font-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="field">
+    <div class="label">Font Size</div>
+    <input type="number" id="font-size-input" value="16" min="1" max="1000" step="1">
+  </div>
+
+  <div class="preview" id="preview">
+    <span class="preview-text" id="preview-text">The quick brown fox</span>
+  </div>
+
+  <div class="field" style="gap:8px">
+    <button class="btn btn-primary" id="btn-done">Done — Save as Variable</button>
+    <div class="status" id="status"></div>
+  </div>
+</div>
+
+<script>
+let allFamilies = [];
+let selectedFamily = "Roboto";
+let fontDropdownOpen = false;
+let searchTimer = null;
+
+function renderFontList(filter) {
+  const list = document.getElementById("font-list");
+  const lf = (filter || "").toLowerCase();
+  const shown = lf ? allFamilies.filter(f => f.toLowerCase().indexOf(lf) !== -1) : allFamilies;
+
+  if (shown.length === 0) {
+    list.innerHTML = '<div class="font-list-empty">No fonts found</div>';
+    return;
+  }
+
+  const frag = document.createDocumentFragment();
+  shown.forEach(family => {
+    const item = document.createElement("div");
+    item.className = "font-list-item" + (family === selectedFamily ? " selected" : "");
+    item.textContent = family;
+    item.style.fontFamily = "'" + family.replace(/'/g, "\\'") + "', sans-serif";
+    item.dataset.family = family;
+    frag.appendChild(item);
+  });
+  list.innerHTML = "";
+  list.appendChild(frag);
+
+  const sel = list.querySelector(".selected");
+  if (sel) sel.scrollIntoView({ block: "nearest" });
+}
+
+function openDropdown() {
+  document.getElementById("font-dropdown").classList.add("open");
+  document.getElementById("font-search").value = "";
+  renderFontList("");
+  setTimeout(() => document.getElementById("font-search").focus(), 0);
+  fontDropdownOpen = true;
+}
+
+function closeDropdown() {
+  document.getElementById("font-dropdown").classList.remove("open");
+  fontDropdownOpen = false;
+}
+
+function selectFont(family) {
+  selectedFamily = family;
+  const input = document.getElementById("font-picker-input");
+  input.value = family;
+  input.style.fontFamily = "'" + family.replace(/'/g, "\\'") + "', sans-serif";
+  closeDropdown();
+  updatePreview();
+}
+
+function updatePreview() {
+  const size = parseFloat(document.getElementById("font-size-input").value) || 16;
+  const clamped = Math.min(size, 64);
+  const el = document.getElementById("preview-text");
+  el.style.fontFamily = "'" + selectedFamily.replace(/'/g, "\\'") + "', sans-serif";
+  el.style.fontSize = clamped + "px";
+}
+
+function setStatus(msg, type) {
+  const el = document.getElementById("status");
+  el.textContent = msg;
+  el.className = "status" + (type ? " " + type : "");
+}
+
+document.getElementById("font-picker-input").addEventListener("click", () => {
+  if (fontDropdownOpen) closeDropdown(); else openDropdown();
+});
+
+document.getElementById("font-search").addEventListener("input", function () {
+  clearTimeout(searchTimer);
+  const val = this.value;
+  searchTimer = setTimeout(() => renderFontList(val), 100);
+});
+
+document.getElementById("font-list").addEventListener("click", (e) => {
+  const item = e.target.closest(".font-list-item");
+  if (item) selectFont(item.dataset.family);
+});
+
+document.addEventListener("click", (e) => {
+  if (fontDropdownOpen && !document.getElementById("font-picker").contains(e.target)) {
+    closeDropdown();
+  }
+});
+
+document.getElementById("font-size-input").addEventListener("input", updatePreview);
+
+document.getElementById("btn-done").addEventListener("click", () => {
+  const fontSize = parseFloat(document.getElementById("font-size-input").value);
+  if (!selectedFamily) { setStatus("Select a font first", "error"); return; }
+  if (isNaN(fontSize) || fontSize <= 0) { setStatus("Enter a valid font size", "error"); return; }
+
+  document.getElementById("btn-done").disabled = true;
+  setStatus("Saving…");
+  parent.postMessage({ pluginMessage: { type: "save-variable", fontFamily: selectedFamily, fontSize } }, "*");
+});
+
+window.onmessage = (event) => {
+  const msg = event.data.pluginMessage;
+  if (!msg) return;
+
+  switch (msg.type) {
+    case "fonts-list": {
+      allFamilies = msg.families;
+      if (allFamilies.indexOf(selectedFamily) === -1) {
+        selectedFamily = allFamilies.indexOf("Roboto") !== -1 ? "Roboto" : (allFamilies[0] || "Roboto");
+      }
+      const input = document.getElementById("font-picker-input");
+      input.value = selectedFamily;
+      input.style.fontFamily = "'" + selectedFamily.replace(/'/g, "\\'") + "', sans-serif";
+      input.placeholder = "Select font…";
+      updatePreview();
+      break;
+    }
+
+    case "save-complete": {
+      setStatus(`Saved "${msg.fontFamily}" @ ${msg.fontSize}px to "${msg.collection}"`, "success");
+      document.getElementById("btn-done").disabled = false;
+      break;
+    }
+
+    case "save-error": {
+      setStatus("Error: " + msg.error, "error");
+      document.getElementById("btn-done").disabled = false;
+      break;
+    }
+  }
+};
+
+parent.postMessage({ pluginMessage: { type: "get-fonts" } }, "*");
+</script>
+</body>
+</html>
