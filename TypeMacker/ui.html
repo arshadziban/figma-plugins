@@ -209,6 +209,16 @@
     font-family: inherit;
   }
   .table-row input:focus { outline: none; border-color: rgba(77,230,170,0.5); }
+  .table-row input[type="number"]::-webkit-outer-spin-button,
+  .table-row input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .table-row input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+    text-align: center;
+  }
   .row-preview {
     font-weight: 700;
     overflow: hidden;
@@ -266,77 +276,7 @@
     font-family: inherit;
   }
   .text-input:focus { outline: none; border-color: rgba(77,230,170,0.5); }
-
-  /* ── CUSTOM DROPDOWN ────────────────────────────── */
-  .dropdown { position: relative; }
-  .dropdown-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    cursor: pointer;
-    color: var(--text-primary);
-  }
-  .dropdown-toggle svg { flex-shrink: 0; color: var(--text-secondary); transition: transform .15s; }
-  .dropdown.open .dropdown-toggle svg { transform: rotate(180deg); }
-  .dropdown.open .dropdown-toggle { border-color: rgba(77,230,170,0.5); }
-  .dropdown-menu {
-    display: none;
-    flex-direction: column;
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    right: 0;
-    max-height: 260px;
-    background: #1a1b1f;
-    border: 1px solid var(--card-border);
-    border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.5);
-    z-index: 20;
-    overflow: hidden;
-  }
-  .dropdown.open .dropdown-menu { display: flex; }
-  .dropdown-search-wrap {
-    padding: 6px;
-    border-bottom: 1px solid var(--card-border);
-    flex-shrink: 0;
-  }
-  .dropdown-search {
-    width: 100%;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--card-border);
-    border-radius: 6px;
-    color: var(--text-primary);
-    font-size: 12px;
-    padding: 7px 9px;
-    font-family: inherit;
-  }
-  .dropdown-search:focus { outline: none; border-color: rgba(77,230,170,0.5); }
-  .dropdown-search::placeholder { color: var(--text-tertiary); }
-  .dropdown-options {
-    overflow-y: auto;
-    padding: 4px;
-  }
-  .dropdown-option {
-    padding: 7px 10px;
-    font-size: 12.5px;
-    color: var(--text-primary);
-    border-radius: 6px;
-    cursor: pointer;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .dropdown-option:hover { background: rgba(255,255,255,0.06); }
-  .dropdown-option.selected { background: rgba(77,230,170,0.12); color: var(--accent); }
-  .dropdown-no-results {
-    padding: 12px 10px;
-    font-size: 11.5px;
-    color: var(--text-tertiary);
-    text-align: center;
-  }
-  .dropdown-options::-webkit-scrollbar { width: 6px; }
-  .dropdown-options::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 3px; }
+  select.text-input { cursor: pointer; }
 
   .var-types-row { display: flex; flex-direction: column; gap: 8px; }
   .checkbox-row {
@@ -616,13 +556,7 @@
             <label class="field-label">Collection Name</label>
             <input class="text-input" id="scaleCollectionName" type="text" value="Typography" />
             <label class="field-label" style="margin-top:14px;">Font Family (for text styles)</label>
-            <div class="dropdown" id="scaleFontFamily">
-              <button type="button" class="dropdown-toggle text-input">
-                <span class="dropdown-value">Inter</span>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-              </button>
-              <div class="dropdown-menu"></div>
-            </div>
+            <select class="text-input" id="scaleFontFamily"></select>
           </div>
           <div>
             <label class="field-label">Variable Types</label>
@@ -771,13 +705,7 @@
             <label class="field-label">Collection Name</label>
             <input class="text-input" id="customCollectionName" type="text" value="Typography" />
             <label class="field-label" style="margin-top:14px;">Font Family (for text styles)</label>
-            <div class="dropdown" id="customFontFamily">
-              <button type="button" class="dropdown-toggle text-input">
-                <span class="dropdown-value">Inter</span>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-              </button>
-              <div class="dropdown-menu"></div>
-            </div>
+            <select class="text-input" id="customFontFamily"></select>
           </div>
           <div>
             <label class="field-label">Variable Types</label>
@@ -1084,85 +1012,15 @@
   }
 
   // ── FONT LIST / CUSTOM DROPDOWN ──────────────────
-  function populateFontSelect(dropdownId, families) {
-    var dropdown = document.getElementById(dropdownId);
-    var toggle = dropdown.querySelector('.dropdown-toggle');
-    var valueEl = dropdown.querySelector('.dropdown-value');
-    var menu = dropdown.querySelector('.dropdown-menu');
-    var selected = families.indexOf('Inter') !== -1 ? 'Inter' : (families[0] || '');
-    var query = '';
-
-    menu.innerHTML =
-      '<div class="dropdown-search-wrap">'
-      + '<input type="text" class="dropdown-search" placeholder="Search fonts…" />'
-      + '</div>'
-      + '<div class="dropdown-options"></div>';
-    var searchInput = menu.querySelector('.dropdown-search');
-    var optionsWrap = menu.querySelector('.dropdown-options');
-
-    function renderOptions() {
-      var filtered = families;
-      if (query) {
-        var q = query.toLowerCase();
-        filtered = [];
-        for (var i = 0; i < families.length; i++) {
-          if (families[i].toLowerCase().indexOf(q) !== -1) filtered.push(families[i]);
-        }
-      }
-
-      if (!filtered.length) {
-        optionsWrap.innerHTML = '<div class="dropdown-no-results">No fonts found</div>';
-        return;
-      }
-
-      var html = '';
-      for (var i = 0; i < filtered.length; i++) {
-        var isSelected = filtered[i] === selected;
-        html += '<div class="dropdown-option' + (isSelected ? ' selected' : '') + '" data-value="' + escapeHtml(filtered[i]) + '">' + escapeHtml(filtered[i]) + '</div>';
-      }
-      optionsWrap.innerHTML = html;
-
-      var options = optionsWrap.querySelectorAll('.dropdown-option');
-      for (var i = 0; i < options.length; i++) {
-        options[i].addEventListener('click', function () {
-          selected = this.getAttribute('data-value');
-          dropdown.setAttribute('data-value', selected);
-          valueEl.textContent = selected;
-          dropdown.classList.remove('open');
-          renderOptions();
-        });
-      }
+  function populateFontSelect(selectId, families) {
+    var sel = document.getElementById(selectId);
+    var html = '';
+    for (var i = 0; i < families.length; i++) {
+      var isSelected = families[i] === 'Inter' ? ' selected' : '';
+      html += '<option value="' + escapeHtml(families[i]) + '"' + isSelected + '>' + escapeHtml(families[i]) + '</option>';
     }
-
-    searchInput.addEventListener('input', function () {
-      query = searchInput.value;
-      renderOptions();
-    });
-    searchInput.addEventListener('click', function (e) { e.stopPropagation(); });
-
-    dropdown.setAttribute('data-value', selected);
-    valueEl.textContent = selected || 'Select font…';
-    renderOptions();
-
-    toggle.addEventListener('click', function (e) {
-      e.stopPropagation();
-      var wasOpen = dropdown.classList.contains('open');
-      var openDropdowns = document.querySelectorAll('.dropdown.open');
-      for (var i = 0; i < openDropdowns.length; i++) openDropdowns[i].classList.remove('open');
-      if (!wasOpen) {
-        dropdown.classList.add('open');
-        query = '';
-        searchInput.value = '';
-        renderOptions();
-        setTimeout(function () { searchInput.focus(); }, 0);
-      }
-    });
+    sel.innerHTML = html;
   }
-
-  document.addEventListener('click', function () {
-    var openDropdowns = document.querySelectorAll('.dropdown.open');
-    for (var i = 0; i < openDropdowns.length; i++) openDropdowns[i].classList.remove('open');
-  });
 
   // ── TOAST ────────────────────────────────────────
   var toast = document.getElementById('toast');
@@ -1222,7 +1080,7 @@
       varLineHeight: onlyStyles ? false : document.getElementById(prefix + 'VarLineHeight').checked,
       varLetterSpacing: onlyStyles ? false : document.getElementById(prefix + 'VarLetterSpacing').checked,
       createStyles: onlyStyles ? true : (document.getElementById(prefix + 'CreateStyles') ? document.getElementById(prefix + 'CreateStyles').checked : false),
-      fontFamily: document.getElementById(prefix + 'FontFamily') ? (document.getElementById(prefix + 'FontFamily').getAttribute('data-value') || 'Inter') : 'Inter',
+      fontFamily: document.getElementById(prefix + 'FontFamily') ? (document.getElementById(prefix + 'FontFamily').value || 'Inter') : 'Inter',
       fontWeight: 'Regular',
     };
   }
