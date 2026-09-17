@@ -1,7 +1,7 @@
 // Shades Maker — generates a full 5% color scale Auto Layout frame from a
 // selected rectangle's fill color.
 
-figma.showUI(__html__, { width: 340, height: 460 });
+figma.showUI(__html__, { width: 340, height: 560 });
 
 // ---------------------------------------------------------------------------
 // Color math
@@ -195,6 +195,54 @@ async function buildColorScaleFrame(base: RGB): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// Color variables generation
+// ---------------------------------------------------------------------------
+
+/**
+ * Creates a Figma Variable Collection named after the base color and adds
+ * one COLOR variable per scale step (e.g. "5%", "10%", … "BASE", … "100%").
+ * If a collection with the same name already exists it is reused, and any
+ * variable that already exists inside it is simply updated.
+ */
+async function buildColorVariables(base: RGB, prefix: string): Promise<number> {
+  const steps = generateScale(base);
+  const collectionName = prefix; // e.g. "green"
+
+  // Reuse existing collection or create a new one.
+  let collection = figma.variables
+    .getLocalVariableCollections()
+    .find((c) => c.name === collectionName);
+
+  if (!collection) {
+    collection = figma.variables.createVariableCollection(collectionName);
+  }
+
+  const modeId = collection.defaultModeId;
+
+  for (const step of steps) {
+    // e.g. "green_5%", "green_BASE", "green_100%"
+    const varName = prefix + '_' + step.label;
+
+    // Check if a variable with this name already exists in the collection.
+    let variable = figma.variables
+      .getLocalVariables("COLOR")
+      .find((v) => v.variableCollectionId === collection!.id && v.name === varName);
+
+    if (!variable) {
+      variable = figma.variables.createVariable(varName, collection, "COLOR");
+    }
+
+    variable.setValueForMode(modeId, {
+      r: step.color.r,
+      g: step.color.g,
+      b: step.color.b,
+    });
+  }
+
+  return steps.length;
+}
+
+// ---------------------------------------------------------------------------
 // UI messaging
 // ---------------------------------------------------------------------------
 
@@ -223,24 +271,44 @@ figma.ui.onmessage = async (msg: { type: string }) => {
     figma.closePlugin();
     return;
   }
-  if (msg.type !== "generate-scale") return;
 
-  const base = getSelectedBaseColor();
-  if (!base) {
-    figma.ui.postMessage({
-      type: "error",
-      message: "Please select a colored rectangle first",
-    });
+  // ── Generate scale frame ────────────────────────────
+  if (msg.type === "generate-scale") {
+    const base = getSelectedBaseColor();
+    if (!base) {
+      figma.ui.postMessage({ type: "error-scale", message: "Please select a colored rectangle first" });
+      return;
+    }
+    try {
+      await buildColorScaleFrame(base);
+      figma.ui.postMessage({ type: "success-scale", message: "Color scale frame generated!" });
+    } catch (err) {
+      figma.ui.postMessage({ type: "error-scale", message: "Failed to generate scale frame." });
+    }
     return;
   }
 
-  try {
-    await buildColorScaleFrame(base);
-    figma.ui.postMessage({ type: "success", message: "Color scale generated!" });
-  } catch (err) {
-    figma.ui.postMessage({
-      type: "error",
-      message: "Something went wrong while generating the scale.",
-    });
+  // ── Create color variables ──────────────────────────
+  if (msg.type === "create-variables") {
+    const base = getSelectedBaseColor();
+    if (!base) {
+      figma.ui.postMessage({ type: "error-vars", message: "Please select a colored rectangle first" });
+      return;
+    }
+    const prefix = (msg as any).prefix as string;
+    if (!prefix || !prefix.trim()) {
+      figma.ui.postMessage({ type: "error-vars", message: "Please enter a prefix name." });
+      return;
+    }
+    try {
+      const count = await buildColorVariables(base, prefix.trim());
+      figma.ui.postMessage({
+        type: "success-vars",
+        message: `${count} variables created in collection "${prefix.trim()}"`,
+      });
+    } catch (err) {
+      figma.ui.postMessage({ type: "error-vars", message: "Failed to create color variables." });
+    }
+    return;
   }
 };

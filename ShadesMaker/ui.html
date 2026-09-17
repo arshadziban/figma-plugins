@@ -224,8 +224,6 @@
     cursor: pointer;
     position: relative;
     transition: filter .15s, transform .1s;
-    margin-top: auto;
-    flex-shrink: 0;
   }
   .generate-btn:hover:not(:disabled) { filter: brightness(1.07); }
   .generate-btn:active:not(:disabled) { transform: scale(0.985); }
@@ -235,6 +233,131 @@
     right: 16px;
     display: flex;
     align-items: center;
+  }
+
+  /* ── VARS BUTTON ─────────────────────────────────── */
+  .vars-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--accent);
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    border: 1.5px solid rgba(77,230,170,0.3);
+    cursor: pointer;
+    position: relative;
+    transition: background .15s, border-color .15s, transform .1s;
+    flex-shrink: 0;
+  }
+  .vars-btn:hover:not(:disabled) {
+    background: rgba(77,230,170,0.07);
+    border-color: rgba(77,230,170,0.55);
+  }
+  .vars-btn:active:not(:disabled) { transform: scale(0.985); }
+  .vars-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* ── BUTTON GROUP ────────────────────────────────── */
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  /* ── TOAST ───────────────────────────────────────── */
+  .toast {
+    display: none;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 13px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+    flex-shrink: 0;
+  }
+  .toast.success {
+    background: rgba(77,230,170,0.1);
+    border: 1px solid rgba(77,230,170,0.25);
+    color: var(--accent);
+  }
+  .toast.error {
+    background: rgba(255,100,80,0.1);
+    border: 1px solid rgba(255,100,80,0.25);
+    color: #ff8570;
+  }
+
+  /* ── PREFIX INPUT ───────────────────────────────── */
+  .prefix-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .prefix-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .prefix-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .prefix-preview {
+    font-size: 10px;
+    color: var(--text-tertiary);
+    font-family: monospace;
+    transition: color .2s;
+  }
+  .prefix-preview.active {
+    color: var(--accent);
+  }
+  .prefix-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border-radius: 8px;
+    border: 1.5px solid var(--card-border);
+    background: var(--card-bg);
+    overflow: hidden;
+    transition: border-color .15s;
+  }
+  .prefix-input-wrap:focus-within {
+    border-color: rgba(77,230,170,0.5);
+  }
+  .prefix-input-badge {
+    padding: 0 10px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    color: var(--text-tertiary);
+    background: rgba(255,255,255,0.03);
+    border-right: 1px solid var(--card-border);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .prefix-input {
+    flex: 1;
+    height: 38px;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-size: 12.5px;
+    padding: 0 10px;
+    font-family: inherit;
+  }
+  .prefix-input::placeholder {
+    color: var(--text-tertiary);
   }
 
   /* ── FOOTER ──────────────────────────────────────── */
@@ -293,18 +416,49 @@
   <div class="empty-preview" style="flex:1;">Select a shape to preview its scale</div>
 </div>
 
-<!-- GENERATE BUTTON -->
-<button class="generate-btn" id="generateBtn" disabled>
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-  </svg>
-  Generate 5% Scale Frame
-  <span class="btn-arrow">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+<!-- BUTTON GROUP -->
+<div class="btn-group">
+
+  <!-- Generate Scale Frame -->
+  <button class="generate-btn" id="generateBtn" disabled>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
     </svg>
-  </span>
-</button>
+    Generate 5% Scale Frame
+    <span class="btn-arrow">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </span>
+  </button>
+
+  <!-- Create Color Variables -->
+  <div class="prefix-row">
+    <div class="prefix-label-row">
+      <span class="prefix-label">Variable Prefix</span>
+      <span class="prefix-preview" id="prefixPreview">e.g. &nbsp;<strong>green</strong>_5%</span>
+    </div>
+    <div class="prefix-input-wrap">
+      <span class="prefix-input-badge">Prefix</span>
+      <input class="prefix-input" id="prefixInput" type="text" placeholder="e.g. green, primary, brand…" maxlength="40" />
+    </div>
+  </div>
+
+  <button class="vars-btn" id="varsBtn" disabled>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+      <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+      <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+      <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+    </svg>
+    Create Color Variables
+  </button>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast"></div>
+
+</div>
 
 <!-- FOOTER -->
 <div class="footer">
@@ -317,17 +471,49 @@
 
 <script>
 (function () {
-  var generateBtn  = document.getElementById('generateBtn');
-  var bigSwatch    = document.getElementById('bigSwatch');
-  var bigHex       = document.getElementById('bigHex');
-  var swatchRow    = document.getElementById('swatchRow');
+  var generateBtn   = document.getElementById('generateBtn');
+  var varsBtn       = document.getElementById('varsBtn');
+  var toast         = document.getElementById('toast');
+  var prefixInput   = document.getElementById('prefixInput');
+  var prefixPreview = document.getElementById('prefixPreview');
+  var bigSwatch     = document.getElementById('bigSwatch');
+  var bigHex        = document.getElementById('bigHex');
+  var swatchRow     = document.getElementById('swatchRow');
   var populatedView = document.getElementById('populatedView');
-  var emptyView    = document.getElementById('emptyView');
+  var emptyView     = document.getElementById('emptyView');
+  var toastTimer    = null;
+
+  // Live prefix preview
+  prefixInput.addEventListener('input', function () {
+    var val = prefixInput.value.trim();
+    if (val) {
+      prefixPreview.innerHTML = '<strong>' + escapeHtml(val) + '</strong>_5%';
+      prefixPreview.className = 'prefix-preview active';
+    } else {
+      prefixPreview.innerHTML = 'e.g. &nbsp;<strong>green</strong>_5%';
+      prefixPreview.className = 'prefix-preview';
+    }
+  });
+
+  function escapeHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
 
   function showPopulated(show) {
     populatedView.style.display = show ? 'flex' : 'none';
     emptyView.style.display     = show ? 'none' : 'flex';
     generateBtn.disabled        = !show;
+    varsBtn.disabled            = !show;
+  }
+
+  function showToast(message, kind) {
+    clearTimeout(toastTimer);
+    toast.textContent = message;
+    toast.className = 'toast ' + kind;
+    toast.style.display = 'flex';
+    toastTimer = setTimeout(function () {
+      toast.style.display = 'none';
+    }, 3500);
   }
 
   function renderSwatches(steps) {
@@ -344,16 +530,32 @@
     swatchRow.innerHTML = html;
   }
 
+  // ── Generate scale frame ────────────────────────────
   generateBtn.addEventListener('click', function () {
     generateBtn.disabled = true;
     generateBtn.textContent = 'Generating…';
     parent.postMessage({ pluginMessage: { type: 'generate-scale' } }, '*');
   });
 
+  // ── Create color variables ──────────────────────────
+  varsBtn.addEventListener('click', function () {
+    var prefix = prefixInput.value.trim();
+    if (!prefix) {
+      showToast('⚠ Please enter a prefix name first (e.g. green, primary)', 'error');
+      prefixInput.focus();
+      return;
+    }
+    varsBtn.disabled = true;
+    varsBtn.textContent = 'Creating variables…';
+    parent.postMessage({ pluginMessage: { type: 'create-variables', prefix: prefix } }, '*');
+  });
+
+  // ── Message handler ─────────────────────────────────
   window.onmessage = function (event) {
     var msg = event.data.pluginMessage;
     if (!msg) return;
 
+    // Preview update from selection change
     if (msg.type === 'preview') {
       var steps = msg.steps;
       if (!steps || !steps.length) {
@@ -361,8 +563,6 @@
         return;
       }
       showPopulated(true);
-
-      // Find BASE step
       var baseStep = null;
       for (var i = 0; i < steps.length; i++) {
         if (steps[i].label === 'BASE') { baseStep = steps[i]; break; }
@@ -371,17 +571,47 @@
         bigSwatch.style.background = baseStep.hex;
         bigHex.textContent = baseStep.hex;
       }
-
       renderSwatches(steps);
       return;
     }
 
-    // After generate success/error
-    generateBtn.disabled = false;
-    generateBtn.innerHTML =
-      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'
-      + ' Generate 5% Scale Frame '
-      + '<span class="btn-arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>';
+    // Scale frame responses
+    if (msg.type === 'success-scale') {
+      generateBtn.disabled = false;
+      generateBtn.innerHTML =
+        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'
+        + ' Generate 5% Scale Frame '
+        + '<span class="btn-arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>';
+      showToast('✓ ' + msg.message, 'success');
+      return;
+    }
+    if (msg.type === 'error-scale') {
+      generateBtn.disabled = false;
+      generateBtn.innerHTML =
+        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'
+        + ' Generate 5% Scale Frame '
+        + '<span class="btn-arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>';
+      showToast('⚠ ' + msg.message, 'error');
+      return;
+    }
+
+    // Color variables responses
+    if (msg.type === 'success-vars') {
+      varsBtn.disabled = false;
+      varsBtn.innerHTML =
+        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>'
+        + ' Create Color Variables';
+      showToast('✓ ' + msg.message, 'success');
+      return;
+    }
+    if (msg.type === 'error-vars') {
+      varsBtn.disabled = false;
+      varsBtn.innerHTML =
+        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>'
+        + ' Create Color Variables';
+      showToast('⚠ ' + msg.message, 'error');
+      return;
+    }
   };
 }());
 </script>
