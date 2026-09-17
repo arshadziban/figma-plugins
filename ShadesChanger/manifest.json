@@ -1,0 +1,11 @@
+{
+  "name": "Shades Changer",
+  "id": "shades-changer-color-scale-local-001",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": ["none"]
+  }
+}

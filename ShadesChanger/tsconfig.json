@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["ES2017"],
+    "module": "none",
+    "strict": true,
+    "noImplicitAny": true,
+    "typeRoots": ["./node_modules/@types", "./node_modules/@figma"]
+  },
+  "include": ["code.ts"]
+}

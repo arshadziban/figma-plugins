@@ -1,0 +1,12 @@
+{
+  "name": "shades-changer",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.100.0",
+    "typescript": "^5.5.0"
+  }
+}
