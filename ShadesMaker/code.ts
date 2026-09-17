@@ -1,17 +1,13 @@
-// Shades Changer — generates a full 5% color scale Auto Layout frame from a
+// Shades Maker — generates a full 5% color scale Auto Layout frame from a
 // selected rectangle's fill color.
 
-figma.showUI(__html__, { width: 340, height: 420 });
+figma.showUI(__html__, { width: 340, height: 460 });
 
 // ---------------------------------------------------------------------------
 // Color math
 // ---------------------------------------------------------------------------
 
-interface RGB {
-  r: number; // 0-1
-  g: number;
-  b: number;
-}
+
 
 function rgbToHex({ r, g, b }: RGB): string {
   const toHex = (v: number) =>
@@ -133,7 +129,7 @@ async function buildColorScaleFrame(base: RGB): Promise<void> {
   ]);
 
   const mainFrame = figma.createFrame();
-  mainFrame.name = `Shades Changer – ${rgbToHex(base)}`;
+  mainFrame.name = `Shades Maker – ${rgbToHex(base)}`;
   mainFrame.layoutMode = "VERTICAL";
   mainFrame.primaryAxisSizingMode = "AUTO";
   mainFrame.counterAxisSizingMode = "AUTO";
@@ -223,6 +219,10 @@ figma.on("selectionchange", sendPreview);
 sendPreview();
 
 figma.ui.onmessage = async (msg: { type: string }) => {
+  if (msg.type === "cancel") {
+    figma.closePlugin();
+    return;
+  }
   if (msg.type !== "generate-scale") return;
 
   const base = getSelectedBaseColor();

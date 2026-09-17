@@ -1,0 +1,66 @@
+# ════════════════════════════════════════════════════════
+#  .gitignore — figma-plugins monorepo
+#  Covers: plain JS plugins + TypeScript plugins (ShadesMaker)
+# ════════════════════════════════════════════════════════
+
+# ── Node / npm ────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Lock files — uncomment if you want to track them
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ── TypeScript build artefacts ────────────────────────
+# Each plugin's code.js is compiled from code.ts.
+# Only the TypeScript source is version-controlled;
+# the compiled output is regenerated via `npm run build`.
+#
+# Plain-JS plugins do NOT have a code.ts, so their
+# code.js IS the source — exclude them from this rule.
+ShadesMaker/*.tsbuildinfo
+ShadesMaker/*.d.ts
+
+# ── TypeScript config output ──────────────────────────
+*.tsbuildinfo
+
+# ── OS artefacts ──────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ── Editor / IDE ──────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+*.orig
+
+# ── Environment / secrets ─────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Build / dist ──────────────────────────────────────
+dist/
+build/
+out/
+coverage/
+.cache/
+
+# ── Logs ──────────────────────────────────────────────
+*.log
+logs/
