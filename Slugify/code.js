@@ -21,27 +21,16 @@ figma.ui.onmessage = function (msg) {
       return;
     }
 
+    // Only edit text content for directly selected text layers.
+    // Containers (frames, groups, etc.) are renamed, not recursed into.
     var textNodes = [];
-    var visitedCount = 0;
-
-    function collect(node) {
-      visitedCount++;
-      if (node.type === "TEXT") {
-        textNodes.push(node);
-        return;
-      }
-      if (node.children) {
-        for (var i = 0; i < node.children.length; i++) {
-          collect(node.children[i]);
-        }
-      }
-    }
-
     for (var i = 0; i < nodes.length; i++) {
-      collect(nodes[i]);
+      if (nodes[i].type === "TEXT") {
+        textNodes.push(nodes[i]);
+      }
     }
 
-    // No text nodes found — rename the selected layers instead
+    // No selected layer is a text layer — rename the selected layers instead
     if (textNodes.length === 0) {
       var seenTypes = {};
       var typeList = [];
@@ -51,7 +40,7 @@ figma.ui.onmessage = function (msg) {
       }
       figma.ui.postMessage({
         type: "success",
-        text: "No text layers found inside [" + typeList.join(", ") + "] (" + visitedCount + " nodes scanned). Renamed " + nodes.length + " layer" + (nodes.length > 1 ? "s" : "") + " to \"" + slug + "\"."
+        text: "Renamed " + nodes.length + " layer" + (nodes.length > 1 ? "s" : "") + " [" + typeList.join(", ") + "] to \"" + slug + "\"."
       });
       return;
     }
