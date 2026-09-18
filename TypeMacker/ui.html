@@ -185,7 +185,7 @@
   }
   .table-head, .table-row-inputs {
     display: grid;
-    grid-template-columns: 24px 1.3fr 0.7fr 0.7fr 0.8fr 26px;
+    grid-template-columns: 24px 1.1fr 0.85fr 0.6fr 0.6fr 0.8fr 26px;
     gap: 8px;
     align-items: center;
     padding: 8px 12px;
@@ -211,6 +211,65 @@
     font-family: inherit;
   }
   .table-row input:focus { outline: none; border-color: rgba(77,230,170,0.5); }
+
+  /* ── ROW STYLE DROPDOWN ─────────────────────────── */
+  .row-style-dropdown { position: relative; }
+  .row-style-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    width: 100%;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 12px;
+    padding: 6px 8px;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .row-style-toggle svg { flex-shrink: 0; color: var(--text-secondary); transition: transform .15s; }
+  .row-style-dropdown.open .row-style-toggle svg { transform: rotate(180deg); }
+  .row-style-dropdown.open .row-style-toggle { border-color: rgba(77,230,170,0.5); }
+  .row-style-dropdown.disabled .row-style-toggle { opacity: 0.5; cursor: not-allowed; }
+  .row-style-value {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .row-style-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    min-width: 120px;
+    max-height: 200px;
+    overflow-y: auto;
+    background: var(--panel-bg);
+    border: 1.5px solid var(--card-border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.5);
+    z-index: 30;
+    padding: 4px;
+  }
+  .row-style-dropdown.open .row-style-menu { display: block; }
+  .row-style-option {
+    padding: 7px 10px;
+    font-size: 12px;
+    color: var(--text-primary);
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .row-style-option:hover { background: rgba(255,255,255,0.06); }
+  .row-style-option.selected { background: rgba(77,230,170,0.12); color: var(--accent); }
+  .row-style-menu::-webkit-scrollbar { width: 6px; }
+  .row-style-menu::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 3px; }
+
   .table-row input[type="number"]::-webkit-outer-spin-button,
   .table-row input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -376,7 +435,9 @@
       gap: 6px;
       padding: 8px 8px;
     }
-    .table-head span:nth-child(5),
+    .table-head span:nth-child(3),
+    .table-head span:nth-child(6),
+    .table-row .row-style-dropdown,
     .table-row .row-ls {
       display: none;
     }
@@ -527,7 +588,7 @@
         </div>
         <div class="type-table">
           <div class="table-head">
-            <span></span><span>Name</span><span>Size</span><span>Line Height</span><span>Letter Spacing</span><span></span>
+            <span></span><span>Name</span><span>Style</span><span>Size</span><span>Line Height</span><span>Letter Spacing</span><span></span>
           </div>
           <div id="scaleRows"></div>
         </div>
@@ -600,7 +661,7 @@
           </div>
           <div class="type-table">
             <div class="table-head">
-              <span></span><span>Name</span><span>Size</span><span>Line Height</span><span>Letter Spacing</span><span></span>
+              <span></span><span>Name</span><span>Style</span><span>Size</span><span>Line Height</span><span>Letter Spacing</span><span></span>
             </div>
             <div id="selectionRows"></div>
           </div>
@@ -662,7 +723,7 @@
         </div>
         <div class="type-table">
           <div class="table-head">
-            <span></span><span>Name</span><span>Size</span><span>Line Height</span><span>Letter Spacing</span><span></span>
+            <span></span><span>Name</span><span>Style</span><span>Size</span><span>Line Height</span><span>Letter Spacing</span><span></span>
           </div>
           <div id="customRows"></div>
         </div>
@@ -721,42 +782,42 @@
 
   var PRESETS = {
     minimal: [
-      { name: "Display", size: 56, lineHeight: 64, letterSpacing: "-1%" },
-      { name: "H1", size: 40, lineHeight: 48, letterSpacing: "-0.5%" },
-      { name: "H2", size: 28, lineHeight: 36, letterSpacing: "0%" },
-      { name: "Body Large", size: 16, lineHeight: 24, letterSpacing: "0%" },
-      { name: "Body", size: 14, lineHeight: 20, letterSpacing: "0%" },
-      { name: "Caption", size: 12, lineHeight: 16, letterSpacing: "0%" },
+      { name: "Display", style: "Bold", size: 56, lineHeight: 64, letterSpacing: "-1%" },
+      { name: "H1", style: "Bold", size: 40, lineHeight: 48, letterSpacing: "-0.5%" },
+      { name: "H2", style: "Semibold", size: 28, lineHeight: 36, letterSpacing: "0%" },
+      { name: "Body Large", style: "Regular", size: 16, lineHeight: 24, letterSpacing: "0%" },
+      { name: "Body", style: "Regular", size: 14, lineHeight: 20, letterSpacing: "0%" },
+      { name: "Caption", style: "Regular", size: 12, lineHeight: 16, letterSpacing: "0%" },
     ],
     default: [
-      { name: "Display", size: 64, lineHeight: 72, letterSpacing: "-1%" },
-      { name: "H1", size: 48, lineHeight: 56, letterSpacing: "-1%" },
-      { name: "H2", size: 32, lineHeight: 40, letterSpacing: "-0.5%" },
-      { name: "H3", size: 24, lineHeight: 32, letterSpacing: "-0.25%" },
-      { name: "H4", size: 20, lineHeight: 28, letterSpacing: "0%" },
-      { name: "Body Large", size: 16, lineHeight: 24, letterSpacing: "0%" },
-      { name: "Body", size: 14, lineHeight: 20, letterSpacing: "0%" },
-      { name: "Caption", size: 12, lineHeight: 16, letterSpacing: "0%" },
+      { name: "Display", style: "Bold", size: 64, lineHeight: 72, letterSpacing: "-1%" },
+      { name: "H1", style: "Bold", size: 48, lineHeight: 56, letterSpacing: "-1%" },
+      { name: "H2", style: "Semibold", size: 32, lineHeight: 40, letterSpacing: "-0.5%" },
+      { name: "H3", style: "Semibold", size: 24, lineHeight: 32, letterSpacing: "-0.25%" },
+      { name: "H4", style: "Medium", size: 20, lineHeight: 28, letterSpacing: "0%" },
+      { name: "Body Large", style: "Regular", size: 16, lineHeight: 24, letterSpacing: "0%" },
+      { name: "Body", style: "Regular", size: 14, lineHeight: 20, letterSpacing: "0%" },
+      { name: "Caption", style: "Regular", size: 12, lineHeight: 16, letterSpacing: "0%" },
     ],
     extended: [
-      { name: "Display Large", size: 72, lineHeight: 80, letterSpacing: "-1.5%" },
-      { name: "Display", size: 64, lineHeight: 72, letterSpacing: "-1%" },
-      { name: "H1", size: 48, lineHeight: 56, letterSpacing: "-1%" },
-      { name: "H2", size: 32, lineHeight: 40, letterSpacing: "-0.5%" },
-      { name: "H3", size: 24, lineHeight: 32, letterSpacing: "-0.25%" },
-      { name: "H4", size: 20, lineHeight: 28, letterSpacing: "0%" },
-      { name: "H5", size: 18, lineHeight: 26, letterSpacing: "0%" },
-      { name: "Body Large", size: 16, lineHeight: 24, letterSpacing: "0%" },
-      { name: "Body", size: 14, lineHeight: 20, letterSpacing: "0%" },
-      { name: "Body Small", size: 13, lineHeight: 18, letterSpacing: "0%" },
-      { name: "Caption", size: 12, lineHeight: 16, letterSpacing: "0%" },
-      { name: "Overline", size: 11, lineHeight: 14, letterSpacing: "1%" },
+      { name: "Display Large", style: "Bold", size: 72, lineHeight: 80, letterSpacing: "-1.5%" },
+      { name: "Display", style: "Bold", size: 64, lineHeight: 72, letterSpacing: "-1%" },
+      { name: "H1", style: "Bold", size: 48, lineHeight: 56, letterSpacing: "-1%" },
+      { name: "H2", style: "Semibold", size: 32, lineHeight: 40, letterSpacing: "-0.5%" },
+      { name: "H3", style: "Semibold", size: 24, lineHeight: 32, letterSpacing: "-0.25%" },
+      { name: "H4", style: "Medium", size: 20, lineHeight: 28, letterSpacing: "0%" },
+      { name: "H5", style: "Medium", size: 18, lineHeight: 26, letterSpacing: "0%" },
+      { name: "Body Large", style: "Regular", size: 16, lineHeight: 24, letterSpacing: "0%" },
+      { name: "Body", style: "Regular", size: 14, lineHeight: 20, letterSpacing: "0%" },
+      { name: "Body Small", style: "Regular", size: 13, lineHeight: 18, letterSpacing: "0%" },
+      { name: "Caption", style: "Regular", size: 12, lineHeight: 16, letterSpacing: "0%" },
+      { name: "Overline", style: "Medium", size: 11, lineHeight: 14, letterSpacing: "1%" },
     ],
     custom: []
   };
 
   function defaultBpRow() {
-    return { name: "New Style", enabled: true, desktop: { size: 16, lineHeight: 24, letterSpacing: "0%" }, tablet: { size: 16, lineHeight: 24, letterSpacing: "0%" }, mobile: { size: 16, lineHeight: 24, letterSpacing: "0%" } };
+    return { name: "New Style", style: "Regular", enabled: true, desktop: { size: 16, lineHeight: 24, letterSpacing: "0%" }, tablet: { size: 16, lineHeight: 24, letterSpacing: "0%" }, mobile: { size: 16, lineHeight: 24, letterSpacing: "0%" } };
   }
 
   var state = {
@@ -765,6 +826,7 @@
     selectionRows: [],
     activePreset: "default",
     fonts: [],
+    stylesByFamily: {},
     activeBp: { scale: 'desktop', custom: 'desktop', selection: 'desktop' },
   };
 
@@ -773,7 +835,7 @@
     for (var i = 0; i < rows.length; i++) {
       var r = rows[i];
       var bp = { size: r.size, lineHeight: r.lineHeight, letterSpacing: r.letterSpacing };
-      out.push({ name: r.name, enabled: true, desktop: { size: bp.size, lineHeight: bp.lineHeight, letterSpacing: bp.letterSpacing }, tablet: { size: bp.size, lineHeight: bp.lineHeight, letterSpacing: bp.letterSpacing }, mobile: { size: bp.size, lineHeight: bp.lineHeight, letterSpacing: bp.letterSpacing } });
+      out.push({ name: r.name, style: r.style || 'Regular', enabled: true, desktop: { size: bp.size, lineHeight: bp.lineHeight, letterSpacing: bp.letterSpacing }, tablet: { size: bp.size, lineHeight: bp.lineHeight, letterSpacing: bp.letterSpacing }, mobile: { size: bp.size, lineHeight: bp.lineHeight, letterSpacing: bp.letterSpacing } });
     }
     return out;
   }
@@ -793,11 +855,21 @@
     return (actualSize ? px / actualSize : 0) + 'em';
   }
 
-  function previewStyle(bpData) {
+  var FONT_STYLE_CSS = {
+    Regular: { weight: 400, italic: false },
+    Medium: { weight: 500, italic: false },
+    Semibold: { weight: 600, italic: false },
+    Bold: { weight: 700, italic: false },
+    Light: { weight: 300, italic: false },
+    Italic: { weight: 400, italic: true },
+  };
+
+  function previewStyle(bpData, styleName) {
     var fontSize = Math.min(Math.max(bpData.size * 0.55, 11), 32);
     var ratio = bpData.size ? (bpData.lineHeight / bpData.size) : 1.4;
     var ls = letterSpacingEm(bpData.letterSpacing, bpData.size);
-    return 'font-size:' + fontSize + 'px; line-height:' + ratio + '; letter-spacing:' + ls + ';';
+    var styleCss = FONT_STYLE_CSS[styleName] || FONT_STYLE_CSS.Regular;
+    return 'font-size:' + fontSize + 'px; line-height:' + ratio + '; letter-spacing:' + ls + '; font-weight:' + styleCss.weight + '; font-style:' + (styleCss.italic ? 'italic' : 'normal') + ';';
   }
 
   // ── TABS ────────────────────────────────────────
@@ -829,6 +901,62 @@
     });
   }
 
+  var FONT_STYLES = ["Regular", "Medium", "Semibold", "Bold", "Light", "Italic"];
+
+  function styleOptionsFor(fontFamily, selected) {
+    var options = (fontFamily && state.stylesByFamily[fontFamily]) ? state.stylesByFamily[fontFamily].slice() : FONT_STYLES.slice();
+    if (selected && options.indexOf(selected) === -1) options.unshift(selected);
+    return options;
+  }
+
+  function styleDropdownHtml(options, selected, readOnly) {
+    var html = '<div class="row-style-dropdown' + (readOnly ? ' disabled' : '') + '" data-value="' + escapeHtml(selected) + '">'
+      + '<button type="button" class="row-style-toggle">'
+      + '<span class="row-style-value">' + escapeHtml(selected) + '</span>'
+      + '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>'
+      + '</button>'
+      + '<div class="row-style-menu">';
+    for (var i = 0; i < options.length; i++) {
+      var isSelected = options[i] === selected ? ' selected' : '';
+      html += '<div class="row-style-option' + isSelected + '" data-value="' + escapeHtml(options[i]) + '">' + escapeHtml(options[i]) + '</div>';
+    }
+    html += '</div></div>';
+    return html;
+  }
+
+  function bindStyleDropdown(dropdown, onChange) {
+    if (!dropdown || dropdown.classList.contains('disabled')) return;
+    var toggle = dropdown.querySelector('.row-style-toggle');
+    var valueEl = dropdown.querySelector('.row-style-value');
+    var options = dropdown.querySelectorAll('.row-style-option');
+
+    toggle.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var wasOpen = dropdown.classList.contains('open');
+      var openDropdowns = document.querySelectorAll('.row-style-dropdown.open');
+      for (var i = 0; i < openDropdowns.length; i++) openDropdowns[i].classList.remove('open');
+      if (!wasOpen) dropdown.classList.add('open');
+    });
+
+    for (var i = 0; i < options.length; i++) {
+      options[i].addEventListener('click', function () {
+        var value = this.getAttribute('data-value');
+        dropdown.setAttribute('data-value', value);
+        valueEl.textContent = value;
+        var siblings = dropdown.querySelectorAll('.row-style-option');
+        for (var j = 0; j < siblings.length; j++) siblings[j].classList.remove('selected');
+        this.classList.add('selected');
+        dropdown.classList.remove('open');
+        onChange(value);
+      });
+    }
+  }
+
+  document.addEventListener('click', function () {
+    var openDropdowns = document.querySelectorAll('.row-style-dropdown.open');
+    for (var i = 0; i < openDropdowns.length; i++) openDropdowns[i].classList.remove('open');
+  });
+
   // ── ROW RENDERING ────────────────────────────────
   function renderRows(containerId, rows, opts) {
     opts = opts || {};
@@ -839,16 +967,19 @@
       var r = rows[i];
       var bpData = r[bp];
       var checked = r.enabled === false ? '' : 'checked';
+      var styleValue = r.style || 'Regular';
+      var styleOptions = styleOptionsFor(r.fontFamily, styleValue);
       html += '<div class="table-row" data-index="' + i + '">'
         + '<div class="table-row-inputs">'
         + '<input type="checkbox" class="row-enabled" ' + checked + (opts.readOnly ? ' disabled' : '') + ' />'
         + '<input type="text" class="row-name" value="' + escapeHtml(r.name) + '" ' + (opts.readOnly ? 'readonly' : '') + ' />'
+        + styleDropdownHtml(styleOptions, styleValue, opts.readOnly)
         + '<input type="number" class="row-size" value="' + bpData.size + '" ' + (opts.readOnly ? 'readonly' : '') + ' />'
         + '<input type="number" class="row-lh" value="' + bpData.lineHeight + '" ' + (opts.readOnly ? 'readonly' : '') + ' />'
         + '<input type="text" class="row-ls" value="' + escapeHtml(bpData.letterSpacing) + '" ' + (opts.readOnly ? 'readonly' : '') + ' />'
         + (opts.readOnly ? '<span></span>' : '<button class="row-remove" title="Remove"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>')
         + '</div>'
-        + '<div class="row-preview-box" style="' + previewStyle(bpData) + '">' + LOREM_PREVIEW_TEXT + '</div>'
+        + '<div class="row-preview-box" style="' + previewStyle(bpData, styleValue) + '">' + LOREM_PREVIEW_TEXT + '</div>'
         + '</div>';
     }
     container.innerHTML = html;
@@ -863,6 +994,7 @@
     var idx = parseInt(rowEl.getAttribute('data-index'), 10);
     var bp = opts.bp || 'desktop';
     var nameInput = rowEl.querySelector('.row-name');
+    var styleDropdown = rowEl.querySelector('.row-style-dropdown');
     var sizeInput = rowEl.querySelector('.row-size');
     var lhInput = rowEl.querySelector('.row-lh');
     var lsInput = rowEl.querySelector('.row-ls');
@@ -873,11 +1005,15 @@
     if (opts.readOnly) return;
 
     function refreshPreview() {
-      previewBox.setAttribute('style', previewStyle(rows[idx][bp]));
+      previewBox.setAttribute('style', previewStyle(rows[idx][bp], rows[idx].style));
     }
 
     nameInput.addEventListener('input', function () {
       rows[idx].name = nameInput.value;
+    });
+    bindStyleDropdown(styleDropdown, function (value) {
+      rows[idx].style = value;
+      refreshPreview();
     });
     sizeInput.addEventListener('input', function () {
       rows[idx][bp].size = parseFloat(sizeInput.value) || 0;
@@ -1166,6 +1302,7 @@
 
     if (msg.type === 'fonts-list') {
       state.fonts = msg.families;
+      state.stylesByFamily = msg.stylesByFamily || {};
       fontDropdowns.scale.setFamilies(msg.families);
       fontDropdowns.custom.setFamilies(msg.families);
       return;

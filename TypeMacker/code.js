@@ -55,7 +55,7 @@ async function generateTextStyles(rows, opts) {
     if (!baseName) continue;
 
     var rowFontFamily = row.fontFamily || defaultFontFamily;
-    var rowFontStyle = row.fontStyle || defaultFontWeight;
+    var rowFontStyle = row.style || row.fontStyle || defaultFontWeight;
     await ensureFontLoaded(rowFontFamily, rowFontStyle);
 
     for (var b = 0; b < breakpoints.length; b++) {
@@ -148,6 +148,7 @@ function collectTextNodes(node, seen, rows) {
         };
         rows.push({
           name: "",
+          style: fontStyle || "Regular",
           fontFamily: fontFamily,
           fontStyle: fontStyle,
           desktop: bpValue,
@@ -173,12 +174,16 @@ figma.ui.onmessage = async function (msg) {
         var fonts = await getAvailableFonts();
         var seen = {};
         var families = [];
+        var stylesByFamily = {};
         for (var i = 0; i < fonts.length; i++) {
           var fam = fonts[i].fontName.family;
+          var sty = fonts[i].fontName.style;
           if (!seen[fam]) { seen[fam] = true; families.push(fam); }
+          if (!stylesByFamily[fam]) stylesByFamily[fam] = [];
+          if (stylesByFamily[fam].indexOf(sty) === -1) stylesByFamily[fam].push(sty);
         }
         families.sort();
-        figma.ui.postMessage({ type: "fonts-list", families: families });
+        figma.ui.postMessage({ type: "fonts-list", families: families, stylesByFamily: stylesByFamily });
         break;
       }
 
