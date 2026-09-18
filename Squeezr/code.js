@@ -1,18 +1,33 @@
-figma.showUI(__html__, { width: 400, height: 420, title: "Image Size Reducer" });
+figma.showUI(__html__, { width: 400, height: 560, title: "Squeezr" });
 
-function getSelectionInfo() {
+async function getSelectionInfo() {
   const selection = figma.currentPage.selection;
   const validTypes = ["FRAME", "GROUP", "COMPONENT", "INSTANCE", "RECTANGLE", "ELLIPSE", "VECTOR", "TEXT", "SECTION"];
+  const filtered = selection.filter(n => validTypes.includes(n.type));
 
-  const nodes = selection
-    .filter(n => validTypes.includes(n.type) || n.type === "FRAME")
-    .map(node => ({
+  const nodes = [];
+  for (const node of filtered) {
+    let thumbnail = null;
+    try {
+      const maxDim = Math.max(node.width, node.height, 1);
+      const scale = Math.min(1, 128 / maxDim);
+      const bytes = await node.exportAsync({
+        format: "PNG",
+        constraint: { type: "SCALE", value: Math.max(scale, 0.01) },
+      });
+      thumbnail = figma.base64Encode(bytes);
+    } catch (err) {
+      thumbnail = null;
+    }
+    nodes.push({
       id: node.id,
       name: node.name,
       type: node.type,
       width: Math.round(node.width),
       height: Math.round(node.height),
-    }));
+      thumbnail,
+    });
+  }
 
   figma.ui.postMessage({ type: "selection", nodes });
 }
@@ -43,6 +58,7 @@ figma.ui.onmessage = async (msg) => {
         bytes: Array.from(bytes),
         name: node.name,
         format,
+        nodeId,
         width: Math.round(node.width * scale),
         height: Math.round(node.height * scale),
       });
