@@ -1,5 +1,7 @@
 figma.showUI(__html__, { width: 560, height: 720, title: "Type Maker" });
 
+var BREAKPOINT_LABELS = { desktop: "Desktop", tablet: "Tablet", mobile: "Mobile" };
+
 var cachedFonts = null;
 
 async function getAvailableFonts() {
@@ -14,33 +16,6 @@ async function getExistingStyleMap() {
   return map;
 }
 
-async function getOrCreateCollection(name) {
-  var collections = await figma.variables.getLocalVariableCollectionsAsync();
-  for (var i = 0; i < collections.length; i++) {
-    if (collections[i].name === name) return collections[i];
-  }
-  return figma.variables.createVariableCollection(name);
-}
-
-async function getExistingVariableMap(collectionId) {
-  var map = {};
-  var vars = await figma.variables.getLocalVariablesAsync("FLOAT");
-  for (var i = 0; i < vars.length; i++) {
-    if (vars[i].variableCollectionId === collectionId) map[vars[i].name] = vars[i];
-  }
-  return map;
-}
-
-async function createOrUpdateVariable(collection, modeId, existingMap, name, value) {
-  var v = existingMap[name];
-  if (!v) {
-    v = figma.variables.createVariable(name, collection, "FLOAT");
-    existingMap[name] = v;
-  }
-  v.setValueForMode(modeId, value);
-  return v;
-}
-
 function parseLetterSpacing(raw) {
   if (typeof raw === "number") return { value: raw, unit: "PERCENT" };
   var s = String(raw).trim();
@@ -50,18 +25,11 @@ function parseLetterSpacing(raw) {
   return { value: parseFloat(s) || 0, unit: "PIXELS" };
 }
 
-async function generateVariablesAndStyles(rows, opts) {
-  var collectionName = opts.collectionName || "Typography";
-  var makeFontSizeVar = !!opts.varFontSize;
-  var makeLineHeightVar = !!opts.varLineHeight;
-  var makeLetterSpacingVar = !!opts.varLetterSpacing;
-  var alsoCreateStyles = !!opts.createStyles;
+async function generateTextStyles(rows, opts) {
   var defaultFontFamily = opts.fontFamily || "Inter";
   var defaultFontWeight = opts.fontWeight || "Regular";
+  var breakpoints = (opts.breakpoints && opts.breakpoints.length) ? opts.breakpoints : ["desktop"];
 
-  var collection = await getOrCreateCollection(collectionName);
-  var modeId = collection.modes[0].modeId;
-  var existingVars = await getExistingVariableMap(collection.id);
   var existingStyles = await getExistingStyleMap();
 
   var loadedFonts = {};
@@ -72,15 +40,13 @@ async function generateVariablesAndStyles(rows, opts) {
     loadedFonts[key] = true;
   }
 
-  if (alsoCreateStyles) {
-    var hasPerRowFont = false;
-    for (var i = 0; i < rows.length; i++) {
-      if (rows[i].fontFamily) hasPerRowFont = true;
-    }
-    if (!hasPerRowFont) await ensureFontLoaded(defaultFontFamily, defaultFontWeight);
+  var hasPerRowFont = false;
+  for (var i = 0; i < rows.length; i++) {
+    if (rows[i].fontFamily) hasPerRowFont = true;
   }
+  if (!hasPerRowFont) await ensureFontLoaded(defaultFontFamily, defaultFontWeight);
 
-  var created = { variables: 0, styles: 0 };
+  var created = { styles: 0 };
 
   for (var i = 0; i < rows.length; i++) {
     var row = rows[i];
@@ -88,35 +54,24 @@ async function generateVariablesAndStyles(rows, opts) {
     var baseName = row.name.trim();
     if (!baseName) continue;
 
-    var sizeVal = row.size;
-    var lineHeightVal = row.lineHeight;
-    var ls = parseLetterSpacing(row.letterSpacing);
+    var rowFontFamily = row.fontFamily || defaultFontFamily;
+    var rowFontStyle = row.fontStyle || defaultFontWeight;
+    await ensureFontLoaded(rowFontFamily, rowFontStyle);
 
-    if (makeFontSizeVar) {
-      await createOrUpdateVariable(collection, modeId, existingVars, baseName + "/size", sizeVal);
-      created.variables++;
-    }
-    if (makeLineHeightVar) {
-      await createOrUpdateVariable(collection, modeId, existingVars, baseName + "/line-height", lineHeightVal);
-      created.variables++;
-    }
-    if (makeLetterSpacingVar) {
-      await createOrUpdateVariable(collection, modeId, existingVars, baseName + "/letter-spacing", ls.value);
-      created.variables++;
-    }
+    for (var b = 0; b < breakpoints.length; b++) {
+      var bpKey = breakpoints[b];
+      var bpData = row[bpKey];
+      if (!bpData || !bpData.size) continue;
+      var ls = parseLetterSpacing(bpData.letterSpacing);
+      var styleName = BREAKPOINT_LABELS[bpKey] + "/" + baseName;
 
-    if (alsoCreateStyles) {
-      var rowFontFamily = row.fontFamily || defaultFontFamily;
-      var rowFontStyle = row.fontStyle || defaultFontWeight;
-      await ensureFontLoaded(rowFontFamily, rowFontStyle);
-
-      var style = existingStyles[baseName] || figma.createTextStyle();
-      style.name = baseName;
+      var style = existingStyles[styleName] || figma.createTextStyle();
+      style.name = styleName;
       style.fontName = { family: rowFontFamily, style: rowFontStyle };
-      style.fontSize = row.size;
-      style.lineHeight = { value: row.lineHeight, unit: "PIXELS" };
+      style.fontSize = bpData.size;
+      style.lineHeight = { value: bpData.lineHeight, unit: "PIXELS" };
       style.letterSpacing = { value: ls.value, unit: ls.unit };
-      existingStyles[baseName] = style;
+      existingStyles[styleName] = style;
       created.styles++;
     }
   }
@@ -156,7 +111,7 @@ async function getSelectionTypography() {
     collectTextNodes(selection[i], seen, rows);
     collectFontFamilies(selection[i], seenFamilies, layerNames);
   }
-  rows.sort(function (a, b) { return b.size - a.size; });
+  rows.sort(function (a, b) { return b.desktop.size - a.desktop.size; });
   var STYLE_NAMES = ["Display", "H1", "H2", "H3", "H4", "H5", "Body Large", "Body", "Body Small", "Caption", "Overline"];
   for (var i = 0; i < rows.length; i++) {
     rows[i].name = STYLE_NAMES[i] || ("Style " + (i + 1));
@@ -186,13 +141,18 @@ function collectTextNodes(node, seen, rows) {
       var key = String(size);
       if (!seen[key]) {
         seen[key] = true;
+        var bpValue = {
+          size: size,
+          lineHeight: lineHeightPx || Math.round(size * 1.4),
+          letterSpacing: letterSpacing,
+        };
         rows.push({
           name: "",
           fontFamily: fontFamily,
           fontStyle: fontStyle,
-          size: size,
-          lineHeight: lineHeightPx || Math.round(size * 1.4),
-          letterSpacing: letterSpacing,
+          desktop: bpValue,
+          tablet: { size: bpValue.size, lineHeight: bpValue.lineHeight, letterSpacing: bpValue.letterSpacing },
+          mobile: { size: bpValue.size, lineHeight: bpValue.lineHeight, letterSpacing: bpValue.letterSpacing },
           enabled: true,
         });
       }
@@ -229,10 +189,9 @@ figma.ui.onmessage = async function (msg) {
       }
 
       case "generate": {
-        var result = await generateVariablesAndStyles(msg.rows, msg.options);
+        var result = await generateTextStyles(msg.rows, msg.options);
         figma.ui.postMessage({
           type: "generate-complete",
-          variables: result.variables,
           styles: result.styles,
         });
         break;

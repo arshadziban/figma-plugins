@@ -173,6 +173,8 @@
     cursor: pointer;
   }
   .unit-btn.active { background: var(--accent); color: #021208; }
+  .bp-tabs { width: 100%; }
+  .bp-tabs .unit-btn { flex: 1; }
 
   /* ── TABLE ──────────────────────────────────────── */
   .type-table {
@@ -181,9 +183,9 @@
     background: var(--card-bg);
     overflow: hidden;
   }
-  .table-head, .table-row {
+  .table-head, .table-row-inputs {
     display: grid;
-    grid-template-columns: 24px 1.3fr 0.7fr 0.7fr 0.8fr 1.2fr 26px;
+    grid-template-columns: 24px 1.3fr 0.7fr 0.7fr 0.8fr 26px;
     gap: 8px;
     align-items: center;
     padding: 8px 12px;
@@ -219,11 +221,18 @@
     appearance: textfield;
     text-align: center;
   }
-  .row-preview {
-    font-weight: 700;
+  .row-preview-box {
+    margin: 0 12px 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--card-border);
+    color: var(--text-primary);
+    font-weight: 600;
     overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
   }
   .row-remove {
     width: 22px; height: 22px;
@@ -276,48 +285,49 @@
     font-family: inherit;
   }
   .text-input:focus { outline: none; border-color: rgba(77,230,170,0.5); }
-  select.text-input { cursor: pointer; }
 
-  .var-types-row { display: flex; flex-direction: column; gap: 8px; }
+  /* ── FONT SEARCH DROPDOWN ─────────────────────────── */
+  .font-select { position: relative; }
+  .font-select-list {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    max-height: 180px;
+    overflow-y: auto;
+    background: var(--panel-bg);
+    border: 1.5px solid var(--card-border);
+    border-radius: 8px;
+    z-index: 20;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+  }
+  .font-select-list.open { display: block; }
+  .font-select-option {
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--text-primary);
+    cursor: pointer;
+  }
+  .font-select-option:hover,
+  .font-select-option.highlighted {
+    background: rgba(77,230,170,0.1);
+    color: var(--accent);
+  }
+  .font-select-empty {
+    padding: 8px 12px;
+    font-size: 11px;
+    color: var(--text-tertiary);
+  }
+
+  /* ── BREAKPOINTS ───────────────────────────────────── */
+  .breakpoints-row { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
   .checkbox-row {
     display: flex; align-items: center; gap: 8px;
     font-size: 12px;
+    font-weight: 600;
     color: var(--text-primary);
-  }
-  .checkbox-row .hint { color: var(--text-tertiary); font-size: 10.5px; margin-left: 4px; }
-
-  .var-preview {
-    margin-top: 12px;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--card-border);
-    background: rgba(255,255,255,0.02);
-  }
-  .var-preview-label {
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--text-tertiary);
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    margin-bottom: 6px;
-  }
-  .var-preview-name {
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-    font-size: 11px;
-    color: var(--accent);
-    line-height: 1.7;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .var-preview-empty {
-    font-size: 11px;
-    color: var(--text-tertiary);
-  }
-  .var-preview-more {
-    font-size: 10.5px;
-    color: var(--text-tertiary);
-    margin-top: 2px;
+    cursor: pointer;
   }
 
   /* ── SELECTED LAYERS ─────────────────────────────── */
@@ -352,25 +362,7 @@
     text-overflow: ellipsis;
   }
 
-  .settings-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-  }
-
-  .options-row { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
-
   /* ── RESPONSIVE ─────────────────────────────────── */
-  @media (max-width: 640px) {
-    .table-head, .table-row {
-      grid-template-columns: 20px 1fr 0.65fr 0.65fr 0.75fr 26px;
-    }
-    .table-head span:nth-child(6),
-    .table-row .row-preview {
-      display: none;
-    }
-  }
-
   @media (max-width: 480px) {
     body { padding: 16px 14px 12px; gap: 12px; }
     .header-title { font-size: 16px; }
@@ -378,9 +370,8 @@
     .tab { font-size: 11px; padding: 8px 6px; gap: 4px; }
     .presets-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
     .preset-card { padding: 10px 6px; }
-    .settings-grid { grid-template-columns: 1fr; gap: 16px; }
     .section-body { padding-left: 0; }
-    .table-head, .table-row {
+    .table-head, .table-row-inputs {
       grid-template-columns: 18px 1fr 0.6fr 0.6fr 24px;
       gap: 6px;
       padding: 8px 8px;
@@ -389,7 +380,6 @@
     .table-row .row-ls {
       display: none;
     }
-    .options-row { gap: 12px; }
   }
 
   @media (max-width: 360px) {
@@ -526,13 +516,18 @@
         <div class="step-num">2</div>
         <div style="flex:1;">
           <div class="section-title">Configure Typography</div>
-          <div class="section-sub">Adjust values or use the default scale.</div>
+          <div class="section-sub">Adjust values or use the default scale. Size, line height and letter spacing are set per breakpoint.</div>
         </div>
       </div>
       <div class="section-body" style="margin-top:12px;">
+        <div class="unit-toggle bp-tabs" id="scaleBpTabs" style="margin-bottom:10px;">
+          <button class="unit-btn active" data-bp="desktop">Desktop</button>
+          <button class="unit-btn" data-bp="tablet">Tablet</button>
+          <button class="unit-btn" data-bp="mobile">Mobile</button>
+        </div>
         <div class="type-table">
           <div class="table-head">
-            <span></span><span>Name</span><span>Size</span><span>Line Height</span><span>Letter Spacing</span><span>Preview</span><span></span>
+            <span></span><span>Name</span><span>Size</span><span>Line Height</span><span>Letter Spacing</span><span></span>
           </div>
           <div id="scaleRows"></div>
         </div>
@@ -547,29 +542,14 @@
       <div class="section-head">
         <div class="step-num">3</div>
         <div>
-          <div class="section-title">Variable Settings</div>
+          <div class="section-title">Style Settings</div>
         </div>
       </div>
       <div class="section-body" style="margin-top:12px;">
-        <div class="settings-grid">
-          <div>
-            <label class="field-label">Collection Name</label>
-            <input class="text-input" id="scaleCollectionName" type="text" value="Typography" />
-            <label class="field-label" style="margin-top:14px;">Font Family (for text styles)</label>
-            <select class="text-input" id="scaleFontFamily"></select>
-          </div>
-          <div>
-            <label class="field-label">Variable Types</label>
-            <div class="var-types-row">
-              <label class="checkbox-row"><input type="checkbox" id="scaleVarSize" checked /> Font Size <span class="hint">(Number)</span></label>
-              <label class="checkbox-row"><input type="checkbox" id="scaleVarLineHeight" checked /> Line Height <span class="hint">(Number)</span></label>
-              <label class="checkbox-row"><input type="checkbox" id="scaleVarLetterSpacing" checked /> Letter Spacing <span class="hint">(Number)</span></label>
-            </div>
-            <div class="var-preview">
-              <div class="var-preview-label">Preview</div>
-              <div id="scaleVarPreview"></div>
-            </div>
-          </div>
+        <label class="field-label">Font Family (for text styles)</label>
+        <div class="font-select" id="scaleFontFamily">
+          <input type="text" class="text-input font-select-input" placeholder="Search fonts…" autocomplete="off" />
+          <div class="font-select-list"></div>
         </div>
       </div>
     </div>
@@ -578,20 +558,22 @@
       <div class="section-head">
         <div class="step-num">4</div>
         <div>
-          <div class="section-title">Additional Options</div>
+          <div class="section-title">Breakpoints</div>
+          <div class="section-sub">Which screen sizes should get their own text style?</div>
         </div>
       </div>
       <div class="section-body" style="margin-top:12px;">
-        <div class="options-row">
-          <label class="checkbox-row"><input type="checkbox" id="scaleCreateStyles" checked /> Also create text styles</label>
-          <label class="checkbox-row"><input type="checkbox" id="scaleOnlyStyles" /> Only create text styles <span class="hint">(skip variables)</span></label>
+        <div class="breakpoints-row">
+          <label class="checkbox-row"><input type="checkbox" id="scaleBpDesktop" checked /> Desktop</label>
+          <label class="checkbox-row"><input type="checkbox" id="scaleBpTablet" checked /> Tablet</label>
+          <label class="checkbox-row"><input type="checkbox" id="scaleBpMobile" checked /> Mobile</label>
         </div>
       </div>
     </div>
 
     <button class="generate-btn" id="scaleGenerateBtn">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-      Generate Typography Variables
+      Create Text Styles
       <span class="btn-arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
     </button>
   </div>
@@ -610,11 +592,18 @@
         <div class="empty-card" id="selectionEmpty">
           Select one or more text layers on the canvas to get started.
         </div>
-        <div class="type-table" id="selectionTableWrap" style="display:none;">
-          <div class="table-head">
-            <span></span><span>Name</span><span>Size</span><span>Line Height</span><span>Letter Spacing</span><span>Preview</span><span></span>
+        <div id="selectionTableWrap" style="display:none;">
+          <div class="unit-toggle bp-tabs" id="selectionBpTabs" style="margin-bottom:10px;">
+            <button class="unit-btn active" data-bp="desktop">Desktop</button>
+            <button class="unit-btn" data-bp="tablet">Tablet</button>
+            <button class="unit-btn" data-bp="mobile">Mobile</button>
           </div>
-          <div id="selectionRows"></div>
+          <div class="type-table">
+            <div class="table-head">
+              <span></span><span>Name</span><span>Size</span><span>Line Height</span><span>Letter Spacing</span><span></span>
+            </div>
+            <div id="selectionRows"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -622,30 +611,11 @@
     <div>
       <div class="section-head">
         <div class="step-num">2</div>
-        <div><div class="section-title">Variable Settings</div></div>
+        <div><div class="section-title">Fonts Used</div></div>
       </div>
       <div class="section-body" style="margin-top:12px;">
-        <div class="settings-grid">
-          <div>
-            <label class="field-label">Collection Name</label>
-            <input class="text-input" id="selectionCollectionName" type="text" value="Typography" />
-            <label class="field-label" style="margin-top:14px;">Fonts Used</label>
-            <div class="selected-layers" id="selectedLayers">
-              <div class="selected-layers-empty">No text layers selected</div>
-            </div>
-          </div>
-          <div>
-            <label class="field-label">Variable Types</label>
-            <div class="var-types-row">
-              <label class="checkbox-row"><input type="checkbox" id="selectionVarSize" checked /> Font Size <span class="hint">(Number)</span></label>
-              <label class="checkbox-row"><input type="checkbox" id="selectionVarLineHeight" checked /> Line Height <span class="hint">(Number)</span></label>
-              <label class="checkbox-row"><input type="checkbox" id="selectionVarLetterSpacing" checked /> Letter Spacing <span class="hint">(Number)</span></label>
-            </div>
-            <div class="var-preview">
-              <div class="var-preview-label">Preview</div>
-              <div id="selectionVarPreview"></div>
-            </div>
-          </div>
+        <div class="selected-layers" id="selectedLayers">
+          <div class="selected-layers-empty">No text layers selected</div>
         </div>
       </div>
     </div>
@@ -653,19 +623,23 @@
     <div>
       <div class="section-head">
         <div class="step-num">3</div>
-        <div><div class="section-title">Additional Options</div></div>
+        <div>
+          <div class="section-title">Breakpoints</div>
+          <div class="section-sub">Which screen sizes should get their own text style?</div>
+        </div>
       </div>
       <div class="section-body" style="margin-top:12px;">
-        <div class="options-row">
-          <label class="checkbox-row"><input type="checkbox" id="selectionCreateStyles" /> Also create text styles</label>
-          <label class="checkbox-row"><input type="checkbox" id="selectionOnlyStyles" /> Only create text styles <span class="hint">(skip variables)</span></label>
+        <div class="breakpoints-row">
+          <label class="checkbox-row"><input type="checkbox" id="selectionBpDesktop" checked /> Desktop</label>
+          <label class="checkbox-row"><input type="checkbox" id="selectionBpTablet" checked /> Tablet</label>
+          <label class="checkbox-row"><input type="checkbox" id="selectionBpMobile" checked /> Mobile</label>
         </div>
       </div>
     </div>
 
     <button class="generate-btn" id="selectionGenerateBtn" disabled>
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-      Generate Typography Variables
+      Create Text Styles
       <span class="btn-arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
     </button>
   </div>
@@ -677,13 +651,18 @@
         <div class="step-num">1</div>
         <div style="flex:1;">
           <div class="section-title">Build Your Scale</div>
-          <div class="section-sub">Add exactly the sizes you need, from scratch.</div>
+          <div class="section-sub">Add exactly the sizes you need, from scratch. Size, line height and letter spacing are set per breakpoint.</div>
         </div>
       </div>
       <div class="section-body" style="margin-top:12px;">
+        <div class="unit-toggle bp-tabs" id="customBpTabs" style="margin-bottom:10px;">
+          <button class="unit-btn active" data-bp="desktop">Desktop</button>
+          <button class="unit-btn" data-bp="tablet">Tablet</button>
+          <button class="unit-btn" data-bp="mobile">Mobile</button>
+        </div>
         <div class="type-table">
           <div class="table-head">
-            <span></span><span>Name</span><span>Size</span><span>Line Height</span><span>Letter Spacing</span><span>Preview</span><span></span>
+            <span></span><span>Name</span><span>Size</span><span>Line Height</span><span>Letter Spacing</span><span></span>
           </div>
           <div id="customRows"></div>
         </div>
@@ -697,28 +676,13 @@
     <div>
       <div class="section-head">
         <div class="step-num">2</div>
-        <div><div class="section-title">Variable Settings</div></div>
+        <div><div class="section-title">Style Settings</div></div>
       </div>
       <div class="section-body" style="margin-top:12px;">
-        <div class="settings-grid">
-          <div>
-            <label class="field-label">Collection Name</label>
-            <input class="text-input" id="customCollectionName" type="text" value="Typography" />
-            <label class="field-label" style="margin-top:14px;">Font Family (for text styles)</label>
-            <select class="text-input" id="customFontFamily"></select>
-          </div>
-          <div>
-            <label class="field-label">Variable Types</label>
-            <div class="var-types-row">
-              <label class="checkbox-row"><input type="checkbox" id="customVarSize" checked /> Font Size <span class="hint">(Number)</span></label>
-              <label class="checkbox-row"><input type="checkbox" id="customVarLineHeight" checked /> Line Height <span class="hint">(Number)</span></label>
-              <label class="checkbox-row"><input type="checkbox" id="customVarLetterSpacing" checked /> Letter Spacing <span class="hint">(Number)</span></label>
-            </div>
-            <div class="var-preview">
-              <div class="var-preview-label">Preview</div>
-              <div id="customVarPreview"></div>
-            </div>
-          </div>
+        <label class="field-label">Font Family (for text styles)</label>
+        <div class="font-select" id="customFontFamily">
+          <input type="text" class="text-input font-select-input" placeholder="Search fonts…" autocomplete="off" />
+          <div class="font-select-list"></div>
         </div>
       </div>
     </div>
@@ -726,19 +690,23 @@
     <div>
       <div class="section-head">
         <div class="step-num">3</div>
-        <div><div class="section-title">Additional Options</div></div>
+        <div>
+          <div class="section-title">Breakpoints</div>
+          <div class="section-sub">Which screen sizes should get their own text style?</div>
+        </div>
       </div>
       <div class="section-body" style="margin-top:12px;">
-        <div class="options-row">
-          <label class="checkbox-row"><input type="checkbox" id="customCreateStyles" checked /> Also create text styles</label>
-          <label class="checkbox-row"><input type="checkbox" id="customOnlyStyles" /> Only create text styles <span class="hint">(skip variables)</span></label>
+        <div class="breakpoints-row">
+          <label class="checkbox-row"><input type="checkbox" id="customBpDesktop" checked /> Desktop</label>
+          <label class="checkbox-row"><input type="checkbox" id="customBpTablet" checked /> Tablet</label>
+          <label class="checkbox-row"><input type="checkbox" id="customBpMobile" checked /> Mobile</label>
         </div>
       </div>
     </div>
 
     <button class="generate-btn" id="customGenerateBtn">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-      Generate Typography Variables
+      Create Text Styles
       <span class="btn-arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
     </button>
   </div>
@@ -787,25 +755,49 @@
     custom: []
   };
 
+  function defaultBpRow() {
+    return { name: "New Style", enabled: true, desktop: { size: 16, lineHeight: 24, letterSpacing: "0%" }, tablet: { size: 16, lineHeight: 24, letterSpacing: "0%" }, mobile: { size: 16, lineHeight: 24, letterSpacing: "0%" } };
+  }
+
   var state = {
     scaleRows: clone(PRESETS.default),
-    customRows: [{ name: "New Style", size: 16, lineHeight: 24, letterSpacing: "0%" }],
+    customRows: [defaultBpRow()],
     selectionRows: [],
     activePreset: "default",
     fonts: [],
+    activeBp: { scale: 'desktop', custom: 'desktop', selection: 'desktop' },
   };
 
   function clone(rows) {
     var out = [];
     for (var i = 0; i < rows.length; i++) {
       var r = rows[i];
-      out.push({ name: r.name, size: r.size, lineHeight: r.lineHeight, letterSpacing: r.letterSpacing, enabled: true });
+      var bp = { size: r.size, lineHeight: r.lineHeight, letterSpacing: r.letterSpacing };
+      out.push({ name: r.name, enabled: true, desktop: { size: bp.size, lineHeight: bp.lineHeight, letterSpacing: bp.letterSpacing }, tablet: { size: bp.size, lineHeight: bp.lineHeight, letterSpacing: bp.letterSpacing }, mobile: { size: bp.size, lineHeight: bp.lineHeight, letterSpacing: bp.letterSpacing } });
     }
     return out;
   }
 
   function escapeHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  var LOREM_PREVIEW_TEXT = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.";
+
+  // Letter spacing is stored as "-1%" (percent of font size) or a raw px number.
+  // Converting to em keeps it visually correct even though the preview font-size is scaled down.
+  function letterSpacingEm(raw, actualSize) {
+    var s = String(raw).trim();
+    if (s.indexOf('%') !== -1) return (parseFloat(s) || 0) / 100 + 'em';
+    var px = parseFloat(s) || 0;
+    return (actualSize ? px / actualSize : 0) + 'em';
+  }
+
+  function previewStyle(bpData) {
+    var fontSize = Math.min(Math.max(bpData.size * 0.55, 11), 32);
+    var ratio = bpData.size ? (bpData.lineHeight / bpData.size) : 1.4;
+    var ls = letterSpacingEm(bpData.letterSpacing, bpData.size);
+    return 'font-size:' + fontSize + 'px; line-height:' + ratio + '; letter-spacing:' + ls + ';';
   }
 
   // ── TABS ────────────────────────────────────────
@@ -833,28 +825,30 @@
       this.classList.add('active');
       state.activePreset = preset;
       state.scaleRows = clone(PRESETS[preset]);
-      renderRows('scaleRows', state.scaleRows, { previewPrefix: 'scale' });
-      updateVarPreview('scale', state.scaleRows);
+      renderRows('scaleRows', state.scaleRows, { bp: state.activeBp.scale });
     });
   }
 
   // ── ROW RENDERING ────────────────────────────────
   function renderRows(containerId, rows, opts) {
     opts = opts || {};
+    var bp = opts.bp || 'desktop';
     var container = document.getElementById(containerId);
     var html = '';
     for (var i = 0; i < rows.length; i++) {
       var r = rows[i];
+      var bpData = r[bp];
       var checked = r.enabled === false ? '' : 'checked';
-      var previewSize = Math.min(Math.max(r.size * 0.55, 11), 28);
       html += '<div class="table-row" data-index="' + i + '">'
+        + '<div class="table-row-inputs">'
         + '<input type="checkbox" class="row-enabled" ' + checked + (opts.readOnly ? ' disabled' : '') + ' />'
         + '<input type="text" class="row-name" value="' + escapeHtml(r.name) + '" ' + (opts.readOnly ? 'readonly' : '') + ' />'
-        + '<input type="number" class="row-size" value="' + r.size + '" ' + (opts.readOnly ? 'readonly' : '') + ' />'
-        + '<input type="number" class="row-lh" value="' + r.lineHeight + '" ' + (opts.readOnly ? 'readonly' : '') + ' />'
-        + '<input type="text" class="row-ls" value="' + escapeHtml(r.letterSpacing) + '" ' + (opts.readOnly ? 'readonly' : '') + ' />'
-        + '<div class="row-preview" style="font-size:' + previewSize + 'px;">' + escapeHtml(r.name) + '</div>'
+        + '<input type="number" class="row-size" value="' + bpData.size + '" ' + (opts.readOnly ? 'readonly' : '') + ' />'
+        + '<input type="number" class="row-lh" value="' + bpData.lineHeight + '" ' + (opts.readOnly ? 'readonly' : '') + ' />'
+        + '<input type="text" class="row-ls" value="' + escapeHtml(bpData.letterSpacing) + '" ' + (opts.readOnly ? 'readonly' : '') + ' />'
         + (opts.readOnly ? '<span></span>' : '<button class="row-remove" title="Remove"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>')
+        + '</div>'
+        + '<div class="row-preview-box" style="' + previewStyle(bpData) + '">' + LOREM_PREVIEW_TEXT + '</div>'
         + '</div>';
     }
     container.innerHTML = html;
@@ -867,47 +861,55 @@
 
   function bindRow(rowEl, rows, opts) {
     var idx = parseInt(rowEl.getAttribute('data-index'), 10);
+    var bp = opts.bp || 'desktop';
     var nameInput = rowEl.querySelector('.row-name');
     var sizeInput = rowEl.querySelector('.row-size');
     var lhInput = rowEl.querySelector('.row-lh');
     var lsInput = rowEl.querySelector('.row-ls');
     var enabledInput = rowEl.querySelector('.row-enabled');
-    var previewEl = rowEl.querySelector('.row-preview');
+    var previewBox = rowEl.querySelector('.row-preview-box');
     var removeBtn = rowEl.querySelector('.row-remove');
 
     if (opts.readOnly) return;
 
     function refreshPreview() {
-      if (opts.previewPrefix) updateVarPreview(opts.previewPrefix, rows);
+      previewBox.setAttribute('style', previewStyle(rows[idx][bp]));
     }
 
     nameInput.addEventListener('input', function () {
       rows[idx].name = nameInput.value;
-      previewEl.textContent = nameInput.value;
-      refreshPreview();
     });
     sizeInput.addEventListener('input', function () {
-      var v = parseFloat(sizeInput.value) || 0;
-      rows[idx].size = v;
-      var previewSize = Math.min(Math.max(v * 0.55, 11), 28);
-      previewEl.style.fontSize = previewSize + 'px';
+      rows[idx][bp].size = parseFloat(sizeInput.value) || 0;
+      refreshPreview();
     });
     lhInput.addEventListener('input', function () {
-      rows[idx].lineHeight = parseFloat(lhInput.value) || 0;
+      rows[idx][bp].lineHeight = parseFloat(lhInput.value) || 0;
+      refreshPreview();
     });
     lsInput.addEventListener('input', function () {
-      rows[idx].letterSpacing = lsInput.value;
+      rows[idx][bp].letterSpacing = lsInput.value;
+      refreshPreview();
+    });
+    lsInput.addEventListener('keydown', function (e) {
+      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+      e.preventDefault();
+      var s = String(lsInput.value).trim();
+      var hasPercent = s.indexOf('%') !== -1;
+      var num = parseFloat(s) || 0;
+      num = Math.round((num + (e.key === 'ArrowUp' ? 0.1 : -0.1)) * 100) / 100;
+      lsInput.value = num + (hasPercent ? '%' : '');
+      rows[idx][bp].letterSpacing = lsInput.value;
+      refreshPreview();
     });
     enabledInput.addEventListener('change', function () {
       rows[idx].enabled = enabledInput.checked;
       rowEl.style.opacity = enabledInput.checked ? '1' : '0.4';
-      refreshPreview();
     });
     if (removeBtn) {
       removeBtn.addEventListener('click', function () {
         rows.splice(idx, 1);
         renderRowsFor(rowEl.parentElement.id, rows, opts);
-        refreshPreview();
       });
     }
   }
@@ -916,111 +918,149 @@
     renderRows(containerId, rows, opts);
   }
 
-  renderRows('scaleRows', state.scaleRows, { previewPrefix: 'scale' });
-  renderRows('customRows', state.customRows, { previewPrefix: 'custom' });
-  updateVarPreview('scale', state.scaleRows);
-  updateVarPreview('custom', state.customRows);
-  updateVarPreview('selection', state.selectionRows);
-  wireVarPreview('scale', function () { return state.scaleRows; });
-  wireVarPreview('custom', function () { return state.customRows; });
-  wireVarPreview('selection', function () { return state.selectionRows; });
-  wireOnlyStyles('scale', function () { return state.scaleRows; });
-  wireOnlyStyles('custom', function () { return state.customRows; });
-  wireOnlyStyles('selection', function () { return state.selectionRows; });
+  // ── BREAKPOINT TABS ──────────────────────────────
+  function wireBpTabs(tabsId, prefix, getRows, containerId) {
+    var tabsEl = document.getElementById(tabsId);
+    if (!tabsEl) return;
+    var btns = tabsEl.querySelectorAll('.unit-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].addEventListener('click', function () {
+        var bp = this.getAttribute('data-bp');
+        for (var j = 0; j < btns.length; j++) btns[j].classList.remove('active');
+        this.classList.add('active');
+        state.activeBp[prefix] = bp;
+        renderRows(containerId, getRows(), { bp: bp });
+      });
+    }
+  }
+
+  wireBpTabs('scaleBpTabs', 'scale', function () { return state.scaleRows; }, 'scaleRows');
+  wireBpTabs('customBpTabs', 'custom', function () { return state.customRows; }, 'customRows');
+  wireBpTabs('selectionBpTabs', 'selection', function () { return state.selectionRows; }, 'selectionRows');
+
+  renderRows('scaleRows', state.scaleRows, { bp: 'desktop' });
+  renderRows('customRows', state.customRows, { bp: 'desktop' });
 
   // ── ADD ROW ──────────────────────────────────────
   document.getElementById('scaleAddRow').addEventListener('click', function () {
-    state.scaleRows.push({ name: "New Style", size: 16, lineHeight: 24, letterSpacing: "0%", enabled: true });
-    renderRows('scaleRows', state.scaleRows, { previewPrefix: 'scale' });
-    updateVarPreview('scale', state.scaleRows);
+    state.scaleRows.push(defaultBpRow());
+    renderRows('scaleRows', state.scaleRows, { bp: state.activeBp.scale });
   });
   document.getElementById('customAddRow').addEventListener('click', function () {
-    state.customRows.push({ name: "New Style", size: 16, lineHeight: 24, letterSpacing: "0%", enabled: true });
-    renderRows('customRows', state.customRows, { previewPrefix: 'custom' });
-    updateVarPreview('custom', state.customRows);
+    state.customRows.push(defaultBpRow());
+    renderRows('customRows', state.customRows, { bp: state.activeBp.custom });
   });
 
-  // ── VARIABLE NAME PREVIEW ────────────────────────
-  function updateVarPreview(prefix, rows) {
-    var collectionInput = document.getElementById(prefix + 'CollectionName');
-    var collectionName = (collectionInput ? collectionInput.value.trim() : '') || 'Typography';
-    var onlyStylesEl = document.getElementById(prefix + 'OnlyStyles');
-    var onlyStyles = onlyStylesEl ? onlyStylesEl.checked : false;
-    var varSize = onlyStyles ? false : document.getElementById(prefix + 'VarSize').checked;
-    var varLineHeight = onlyStyles ? false : document.getElementById(prefix + 'VarLineHeight').checked;
-    var varLetterSpacing = onlyStyles ? false : document.getElementById(prefix + 'VarLetterSpacing').checked;
-    var previewEl = document.getElementById(prefix + 'VarPreview');
-    if (!previewEl) return;
+  // ── FONT SEARCH DROPDOWN ──────────────────────────
+  function createFontDropdown(containerId) {
+    var container = document.getElementById(containerId);
+    var input = container.querySelector('.font-select-input');
+    var list = container.querySelector('.font-select-list');
+    var families = [];
+    var value = '';
+    var highlighted = -1;
 
-    var enabledRows = [];
-    for (var i = 0; i < rows.length; i++) {
-      if (rows[i].enabled !== false && rows[i].name && rows[i].name.trim()) enabledRows.push(rows[i]);
-    }
-
-    if (!enabledRows.length || (!varSize && !varLineHeight && !varLetterSpacing)) {
-      previewEl.innerHTML = '<div class="var-preview-empty">No variables will be created yet.</div>';
-      return;
-    }
-
-    var maxRows = 2;
-    var html = '';
-    for (var i = 0; i < Math.min(enabledRows.length, maxRows); i++) {
-      var name = enabledRows[i].name.trim();
-      if (varSize) html += '<div class="var-preview-name">' + collectionName + '/' + escapeHtml(name) + '/size</div>';
-      if (varLineHeight) html += '<div class="var-preview-name">' + collectionName + '/' + escapeHtml(name) + '/line-height</div>';
-      if (varLetterSpacing) html += '<div class="var-preview-name">' + collectionName + '/' + escapeHtml(name) + '/letter-spacing</div>';
-    }
-    if (enabledRows.length > maxRows) {
-      var perRow = (varSize ? 1 : 0) + (varLineHeight ? 1 : 0) + (varLetterSpacing ? 1 : 0);
-      var remaining = (enabledRows.length - maxRows) * perRow;
-      html += '<div class="var-preview-more">+ ' + remaining + ' more variable' + (remaining === 1 ? '' : 's') + '</div>';
-    }
-    previewEl.innerHTML = html;
-  }
-
-  function wireVarPreview(prefix, getRows) {
-    var ids = [prefix + 'CollectionName', prefix + 'VarSize', prefix + 'VarLineHeight', prefix + 'VarLetterSpacing'];
-    for (var i = 0; i < ids.length; i++) {
-      var el = document.getElementById(ids[i]);
-      if (!el) continue;
-      el.addEventListener('input', function () { updateVarPreview(prefix, getRows()); });
-      el.addEventListener('change', function () { updateVarPreview(prefix, getRows()); });
-    }
-  }
-
-  function wireOnlyStyles(prefix, getRows) {
-    var onlyStylesEl = document.getElementById(prefix + 'OnlyStyles');
-    if (!onlyStylesEl) return;
-    var createStylesEl = document.getElementById(prefix + 'CreateStyles');
-    var varEls = [
-      document.getElementById(prefix + 'VarSize'),
-      document.getElementById(prefix + 'VarLineHeight'),
-      document.getElementById(prefix + 'VarLetterSpacing'),
-    ];
-
-    function apply() {
-      var onlyStyles = onlyStylesEl.checked;
-      for (var i = 0; i < varEls.length; i++) {
-        varEls[i].disabled = onlyStyles;
+    function matches(filter) {
+      var f = filter.toLowerCase();
+      var out = [];
+      for (var i = 0; i < families.length; i++) {
+        if (families[i].toLowerCase().indexOf(f) !== -1) out.push(families[i]);
       }
-      createStylesEl.disabled = onlyStyles;
-      updateVarPreview(prefix, getRows());
+      return out;
     }
 
-    onlyStylesEl.addEventListener('change', apply);
-    apply();
+    function renderList(filtered) {
+      if (!filtered.length) {
+        list.innerHTML = '<div class="font-select-empty">No fonts found</div>';
+        return;
+      }
+      var html = '';
+      for (var i = 0; i < filtered.length; i++) {
+        html += '<div class="font-select-option' + (i === highlighted ? ' highlighted' : '') + '" data-value="' + escapeHtml(filtered[i]) + '">' + escapeHtml(filtered[i]) + '</div>';
+      }
+      list.innerHTML = html;
+    }
+
+    function currentFiltered() {
+      return matches(input.value);
+    }
+
+    function open() {
+      highlighted = -1;
+      renderList(currentFiltered());
+      list.classList.add('open');
+    }
+
+    function close() {
+      list.classList.remove('open');
+      highlighted = -1;
+    }
+
+    function select(name) {
+      value = name;
+      input.value = name;
+      close();
+    }
+
+    input.addEventListener('focus', function () {
+      input.select();
+      open();
+    });
+    input.addEventListener('input', function () {
+      open();
+    });
+    input.addEventListener('blur', function () {
+      setTimeout(function () {
+        close();
+        input.value = value;
+      }, 120);
+    });
+    input.addEventListener('keydown', function (e) {
+      var filtered = currentFiltered();
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (!list.classList.contains('open')) { open(); return; }
+        highlighted = Math.min(highlighted + 1, filtered.length - 1);
+        renderList(filtered);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        highlighted = Math.max(highlighted - 1, 0);
+        renderList(filtered);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (highlighted >= 0 && filtered[highlighted]) select(filtered[highlighted]);
+        else if (filtered.length === 1) select(filtered[0]);
+        input.blur();
+      } else if (e.key === 'Escape') {
+        input.value = value;
+        close();
+        input.blur();
+      }
+    });
+
+    list.addEventListener('mousedown', function (e) {
+      var opt = e.target.closest('.font-select-option');
+      if (!opt) return;
+      select(opt.getAttribute('data-value'));
+    });
+
+    return {
+      setFamilies: function (f) {
+        families = f;
+        if (families.indexOf('Inter') !== -1) value = 'Inter';
+        else if (families.length) value = families[0];
+        input.value = value;
+      },
+      getValue: function () {
+        return value || input.value;
+      }
+    };
   }
 
-  // ── FONT LIST / CUSTOM DROPDOWN ──────────────────
-  function populateFontSelect(selectId, families) {
-    var sel = document.getElementById(selectId);
-    var html = '';
-    for (var i = 0; i < families.length; i++) {
-      var isSelected = families[i] === 'Inter' ? ' selected' : '';
-      html += '<option value="' + escapeHtml(families[i]) + '"' + isSelected + '>' + escapeHtml(families[i]) + '</option>';
-    }
-    sel.innerHTML = html;
-  }
+  var fontDropdowns = {
+    scale: createFontDropdown('scaleFontFamily'),
+    custom: createFontDropdown('customFontFamily'),
+  };
 
   // ── TOAST ────────────────────────────────────────
   var toast = document.getElementById('toast');
@@ -1066,22 +1106,26 @@
     selectionEmpty.style.display = 'none';
     selectionTableWrap.style.display = 'block';
     selectionGenerateBtn.disabled = false;
-    renderRows('selectionRows', rows, { previewPrefix: 'selection' });
-    updateVarPreview('selection', rows);
+    renderRows('selectionRows', rows, { bp: state.activeBp.selection });
   }
 
   // ── GENERATE HANDLERS ────────────────────────────
+  function collectBreakpoints(prefix) {
+    var keys = ['desktop', 'tablet', 'mobile'];
+    var out = [];
+    for (var i = 0; i < keys.length; i++) {
+      var el = document.getElementById(prefix + 'Bp' + keys[i].charAt(0).toUpperCase() + keys[i].slice(1));
+      if (el && el.checked) out.push(keys[i]);
+    }
+    return out;
+  }
+
   function collectOptions(prefix) {
-    var onlyStylesEl = document.getElementById(prefix + 'OnlyStyles');
-    var onlyStyles = onlyStylesEl ? onlyStylesEl.checked : false;
+    var dropdown = fontDropdowns[prefix];
     return {
-      collectionName: document.getElementById(prefix + 'CollectionName').value.trim() || 'Typography',
-      varFontSize: onlyStyles ? false : document.getElementById(prefix + 'VarSize').checked,
-      varLineHeight: onlyStyles ? false : document.getElementById(prefix + 'VarLineHeight').checked,
-      varLetterSpacing: onlyStyles ? false : document.getElementById(prefix + 'VarLetterSpacing').checked,
-      createStyles: onlyStyles ? true : (document.getElementById(prefix + 'CreateStyles') ? document.getElementById(prefix + 'CreateStyles').checked : false),
-      fontFamily: document.getElementById(prefix + 'FontFamily') ? (document.getElementById(prefix + 'FontFamily').value || 'Inter') : 'Inter',
+      fontFamily: dropdown ? (dropdown.getValue() || 'Inter') : 'Inter',
       fontWeight: 'Regular',
+      breakpoints: collectBreakpoints(prefix),
     };
   }
 
@@ -1093,20 +1137,25 @@
 
   document.getElementById('scaleGenerateBtn').addEventListener('click', function () {
     var btn = this;
+    var opts = collectOptions('scale');
+    if (!opts.breakpoints.length) { showToast('⚠ Select at least one breakpoint.', 'error'); return; }
     setBtnLoading(btn, true, 'Generating…');
-    parent.postMessage({ pluginMessage: { type: 'generate', rows: state.scaleRows, options: collectOptions('scale') } }, '*');
+    parent.postMessage({ pluginMessage: { type: 'generate', rows: state.scaleRows, options: opts } }, '*');
   });
 
   document.getElementById('customGenerateBtn').addEventListener('click', function () {
     var btn = this;
+    var opts = collectOptions('custom');
+    if (!opts.breakpoints.length) { showToast('⚠ Select at least one breakpoint.', 'error'); return; }
     setBtnLoading(btn, true, 'Generating…');
-    parent.postMessage({ pluginMessage: { type: 'generate', rows: state.customRows, options: collectOptions('custom') } }, '*');
+    parent.postMessage({ pluginMessage: { type: 'generate', rows: state.customRows, options: opts } }, '*');
   });
 
   selectionGenerateBtn.addEventListener('click', function () {
     var btn = this;
-    setBtnLoading(btn, true, 'Generating…');
     var opts = collectOptions('selection');
+    if (!opts.breakpoints.length) { showToast('⚠ Select at least one breakpoint.', 'error'); return; }
+    setBtnLoading(btn, true, 'Generating…');
     parent.postMessage({ pluginMessage: { type: 'generate', rows: state.selectionRows, options: opts } }, '*');
   });
 
@@ -1117,8 +1166,8 @@
 
     if (msg.type === 'fonts-list') {
       state.fonts = msg.families;
-      populateFontSelect('scaleFontFamily', msg.families);
-      populateFontSelect('customFontFamily', msg.families);
+      fontDropdowns.scale.setFamilies(msg.families);
+      fontDropdowns.custom.setFamilies(msg.families);
       return;
     }
 
@@ -1135,7 +1184,7 @@
         btns[i].disabled = false;
       }
       selectionGenerateBtn.disabled = state.selectionRows.length === 0;
-      showToast('✓ Created ' + msg.variables + ' variables' + (msg.styles ? ' and ' + msg.styles + ' text styles' : ''), 'success');
+      showToast('✓ Created ' + msg.styles + ' text style' + (msg.styles === 1 ? '' : 's'), 'success');
       return;
     }
 
