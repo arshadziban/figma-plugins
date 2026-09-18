@@ -3,30 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:        #0f1117;
-      --surface:   #181c2a;
-      --border:    #252b42;
-      --border-hi: #3d4875;
-      --accent:    #5c7cfa;
-      --accent-hi: #7b96ff;
-      --green:     #4ade80;
+      --bg:        #0b0e12;
+      --surface:   #12161c;
+      --surface-2: #171c23;
+      --border:    #232a34;
+      --border-hi: #313a48;
+      --mint:      #6ee7b7;
+      --mint-dim:  #34d399;
+      --teal-a:    #14b8a6;
+      --teal-b:    #0d9488;
       --red:       #f87171;
-      --text:      #e2e6f3;
-      --muted:     #6b7499;
-      --label:     #9ba5cc;
+      --text:      #eef1f5;
+      --muted:     #7c8798;
+      --label:     #c6cedb;
+    }
+
+    html, body {
+      height: auto;
     }
 
     body {
-      font-family: 'Inter', -apple-system, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
       background: var(--bg);
       color: var(--text);
-      padding: 0;
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
@@ -34,65 +36,89 @@
     /* ── Header ── */
     .header {
       display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 16px 18px 14px;
-      border-bottom: 1px solid var(--border);
+      align-items: flex-start;
+      gap: 12px;
+      padding: 18px 16px 16px;
     }
 
     .header-icon {
-      width: 28px;
-      height: 28px;
-      background: linear-gradient(135deg, #5c7cfa 0%, #818cf8 100%);
-      border-radius: 7px;
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--teal-a) 0%, var(--teal-b) 100%);
+      border-radius: 11px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
       flex-shrink: 0;
+      color: #0b0e12;
     }
 
+    .header-text { flex: 1; min-width: 0; }
+
     .header-title {
-      font-size: 13px;
-      font-weight: 600;
+      font-size: 19px;
+      font-weight: 700;
       color: var(--text);
-      letter-spacing: 0.1px;
+      letter-spacing: -0.2px;
     }
 
     .header-sub {
-      font-size: 11px;
+      font-size: 12.5px;
       color: var(--muted);
-      margin-top: 1px;
+      margin-top: 3px;
+      line-height: 1.4;
     }
 
     /* ── Body ── */
     .body {
-      flex: 1;
-      padding: 18px;
+      padding: 0 16px 16px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 16px;
     }
 
     /* ── Field group ── */
-    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field { display: flex; flex-direction: column; gap: 8px; }
+
+    .field-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
     .field-label {
-      font-size: 10px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--label);
-      text-transform: uppercase;
-      letter-spacing: 0.7px;
     }
+
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11.5px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--mint-dim);
+      box-shadow: 0 0 6px rgba(52, 211, 153, 0.7);
+    }
+
+    .input-wrap { position: relative; }
 
     input[type="text"] {
       width: 100%;
-      padding: 9px 12px;
-      border: 1px solid var(--border);
-      border-radius: 7px;
+      padding: 11px 36px 11px 13px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
       background: var(--surface);
       color: var(--text);
-      font-size: 13px;
+      font-size: 13.5px;
       font-family: inherit;
       outline: none;
       transition: border-color 0.15s, box-shadow 0.15s;
@@ -101,138 +127,206 @@
     input[type="text"]::placeholder { color: var(--muted); }
 
     input[type="text"]:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(92, 124, 250, 0.15);
+      border-color: var(--mint-dim);
+      box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15);
+    }
+
+    .input-clear {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--border-hi);
+      border: none;
+      color: var(--muted);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .input-clear.show { display: flex; }
+    .input-clear:hover { color: var(--text); }
+
+    /* ── Separator dropdown ── */
+    .sep-select {
+      position: relative;
+    }
+
+    .sep-select select {
+      appearance: none;
+      -webkit-appearance: none;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--label);
+      font-size: 11.5px;
+      font-weight: 500;
+      font-family: inherit;
+      padding: 5px 24px 5px 10px;
+      border-radius: 7px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .sep-select svg {
+      position: absolute;
+      right: 7px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--muted);
     }
 
     /* ── Output card ── */
     .output-card {
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      min-height: 40px;
+      gap: 10px;
+      min-height: 44px;
       transition: border-color 0.2s;
     }
 
-    .output-card.has-value { border-color: var(--border-hi); }
+    .output-card.has-value { border-color: rgba(52, 211, 153, 0.35); background: rgba(52, 211, 153, 0.06); }
 
     .output-slug {
-      font-family: 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
-      font-size: 12.5px;
-      color: var(--green);
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Menlo, monospace;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--mint);
       word-break: break-all;
       flex: 1;
-      letter-spacing: 0.2px;
+      letter-spacing: 0.1px;
     }
 
-    .output-slug.empty { color: var(--muted); font-family: inherit; font-size: 12px; }
+    .output-slug.empty { color: var(--muted); font-family: inherit; font-size: 12.5px; font-weight: 400; }
 
     .copy-inline {
       flex-shrink: 0;
-      background: none;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--surface-2);
       border: 1px solid var(--border);
-      border-radius: 5px;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 500;
-      padding: 4px 9px;
+      border-radius: 7px;
+      color: var(--label);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 6px 10px;
       cursor: pointer;
       font-family: inherit;
-      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      transition: border-color 0.15s, color 0.15s;
       white-space: nowrap;
     }
 
-    .copy-inline:hover {
-      border-color: var(--accent);
-      color: var(--accent-hi);
-      background: rgba(92,124,250,0.07);
-    }
-
+    .copy-inline:hover { border-color: var(--border-hi); color: var(--text); }
     .copy-inline:active { transform: scale(0.96); }
 
-    /* ── Separator ── */
-    .sep {
-      height: 1px;
-      background: var(--border);
-      margin: 0 -18px;
+    /* ── Status ── */
+    .status-text {
+      font-size: 11.5px;
+      font-weight: 500;
+      min-height: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.2s;
     }
 
-    /* ── Status badge ── */
-    .status-bar {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      min-height: 20px;
-    }
-
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      display: none;
-    }
-
-    .status-bar.ok  .status-dot { background: var(--green); display: block; }
-    .status-bar.err .status-dot { background: var(--red);   display: block; }
-    .status-bar.ok  .status-text { color: var(--green); }
-    .status-bar.err .status-text { color: var(--red); }
-    .status-text { color: transparent; }
+    .status-text.show { max-height: 30px; }
+    .status-text.ok  { color: var(--mint-dim); }
+    .status-text.err { color: var(--red); }
 
     /* ── Footer buttons ── */
     .footer {
-      padding: 12px 18px 16px;
       display: flex;
       gap: 8px;
     }
 
     button.btn {
-      flex: 1;
-      padding: 9px 12px;
-      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 12px 14px;
+      border-radius: 10px;
       border: none;
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 13px;
+      font-weight: 700;
       font-family: inherit;
       cursor: pointer;
-      transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+      transition: opacity 0.15s, transform 0.1s, filter 0.15s;
       letter-spacing: 0.1px;
     }
 
-    button.btn:active { transform: scale(0.97); }
+    button.btn:active { transform: scale(0.98); }
 
     .btn-primary {
-      background: linear-gradient(135deg, #5c7cfa 0%, #818cf8 100%);
-      color: #fff;
-      box-shadow: 0 2px 8px rgba(92,124,250,0.3);
+      flex: 1.6;
+      background: var(--mint);
+      color: #06231a;
     }
 
-    .btn-primary:hover { box-shadow: 0 4px 14px rgba(92,124,250,0.45); }
-    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    .btn-primary:hover:not(:disabled) { filter: brightness(1.08); }
+    .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
 
     .btn-ghost {
+      flex: 1;
       background: var(--surface);
-      color: var(--muted);
-      border: 1px solid var(--border);
+      color: var(--label);
+      border: 1.5px solid var(--border);
     }
 
-    .btn-ghost:hover { border-color: var(--border-hi); color: var(--label); }
+    .btn-ghost:hover { border-color: var(--border-hi); color: var(--text); }
+
+    /* ── Separator ── */
+    .sep {
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Info panel ── */
+    .info-panel {
+      display: flex;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 13px;
+    }
+
+    .info-panel svg { flex-shrink: 0; color: var(--muted); margin-top: 1px; }
+
+    .info-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--label);
+      margin-bottom: 3px;
+    }
+
+    .info-desc {
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
   </style>
 </head>
 <body>
 
   <!-- Header -->
   <div class="header">
-    <div class="header-icon">#_</div>
-    <div>
+    <div class="header-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+    </div>
+    <div class="header-text">
       <div class="header-title">Slugify</div>
-      <div class="header-sub">Convert text to underscore slug</div>
+      <div class="header-sub">Convert text to clean slugs and apply to selected layers or text.</div>
     </div>
   </div>
 
@@ -240,44 +334,86 @@
   <div class="body">
 
     <div class="field">
-      <span class="field-label">Input</span>
-      <input type="text" id="input" placeholder="Paste your text here…" autocomplete="off" spellcheck="false" />
+      <div class="field-row">
+        <span class="field-label">Input Text</span>
+        <span class="live-badge"><span class="live-dot"></span>Live preview</span>
+      </div>
+      <div class="input-wrap">
+        <input type="text" id="input" placeholder="Type or paste your text here…" autocomplete="off" spellcheck="false" />
+        <button class="input-clear" id="btn-input-clear" title="Clear input">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
     </div>
 
     <div class="field">
-      <span class="field-label">Slug</span>
+      <div class="field-row">
+        <span class="field-label">Slug Result</span>
+        <label class="sep-select">
+          <select id="separator">
+            <option value="_" selected>Underscore (_)</option>
+            <option value="-">Hyphen (-)</option>
+            <option value=".">Dot (.)</option>
+          </select>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </label>
+      </div>
       <div class="output-card" id="output-card">
         <span class="output-slug empty" id="output">type something above…</span>
-        <button class="copy-inline" id="btn-copy">Copy</button>
+        <button class="copy-inline" id="btn-copy">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          Copy
+        </button>
       </div>
+    </div>
+
+    <span class="status-text" id="status-text"></span>
+
+    <div class="footer">
+      <button class="btn btn-primary" id="btn-apply" disabled>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+        Apply to Selection
+      </button>
+      <button class="btn btn-ghost" id="btn-clear">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+        Clear
+      </button>
     </div>
 
     <div class="sep"></div>
 
-    <div class="status-bar" id="status-bar">
-      <div class="status-dot"></div>
-      <span class="status-text" id="status-text"></span>
+    <div class="info-panel" id="info-panel">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+      <div>
+        <div class="info-title">What happens?</div>
+        <div class="info-desc">If text layers are selected, the slug will replace their text content. Otherwise, it will rename the selected layers.</div>
+      </div>
     </div>
 
   </div>
 
-  <!-- Footer -->
-  <div class="footer">
-    <button class="btn btn-primary" id="btn-apply" disabled>Apply</button>
-    <button class="btn btn-ghost" id="btn-cancel">Close</button>
-  </div>
-
   <script>
-    var inputEl    = document.getElementById("input");
-    var outputEl   = document.getElementById("output");
-    var outputCard = document.getElementById("output-card");
-    var statusBar  = document.getElementById("status-bar");
-    var statusText = document.getElementById("status-text");
-    var btnApply   = document.getElementById("btn-apply");
-    var currentSlug = "";
+    var inputEl      = document.getElementById("input");
+    var inputClearEl = document.getElementById("btn-input-clear");
+    var outputEl     = document.getElementById("output");
+    var outputCard   = document.getElementById("output-card");
+    var statusText   = document.getElementById("status-text");
+    var btnApply     = document.getElementById("btn-apply");
+    var separatorEl  = document.getElementById("separator");
+    var currentSlug  = "";
 
-    inputEl.addEventListener("input", function () {
-      parent.postMessage({ pluginMessage: { type: "slugify", text: inputEl.value } }, "*");
+    function sendSlugify() {
+      parent.postMessage({ pluginMessage: { type: "slugify", text: inputEl.value, separator: separatorEl.value } }, "*");
+      inputClearEl.classList.toggle("show", inputEl.value.length > 0);
+    }
+
+    inputEl.addEventListener("input", sendSlugify);
+    separatorEl.addEventListener("change", sendSlugify);
+
+    inputClearEl.addEventListener("click", function () {
+      inputEl.value = "";
+      inputEl.focus();
+      sendSlugify();
     });
 
     document.getElementById("btn-copy").addEventListener("click", function () {
@@ -298,8 +434,11 @@
       parent.postMessage({ pluginMessage: { type: "apply", slug: currentSlug } }, "*");
     });
 
-    document.getElementById("btn-cancel").addEventListener("click", function () {
-      parent.postMessage({ pluginMessage: { type: "cancel" } }, "*");
+    document.getElementById("btn-clear").addEventListener("click", function () {
+      inputEl.value = "";
+      inputEl.focus();
+      sendSlugify();
+      clearStatus();
     });
 
     window.onmessage = function (event) {
@@ -319,7 +458,6 @@
           outputCard.classList.remove("has-value");
           btnApply.disabled = true;
         }
-        clearStatus();
       }
 
       if (msg.type === "success") showStatus(msg.text, "ok");
@@ -329,14 +467,13 @@
     var statusTimer;
     function showStatus(text, cls) {
       statusText.textContent = text;
-      statusBar.className = "status-bar " + cls;
+      statusText.className = "status-text show " + cls;
       clearTimeout(statusTimer);
       statusTimer = setTimeout(clearStatus, 3000);
     }
 
     function clearStatus() {
-      statusText.textContent = "";
-      statusBar.className = "status-bar";
+      statusText.className = "status-text";
     }
 
     inputEl.focus();

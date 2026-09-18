@@ -1,12 +1,13 @@
-figma.showUI(__html__, { width: 340, height: 320, title: "Slugify" });
+figma.showUI(__html__, { width: 360, height: 480, title: "Slugify" });
 
 figma.ui.onmessage = function (msg) {
   if (msg.type === "slugify") {
+    var separator = msg.separator || "_";
     var slug = msg.text
       .toLowerCase()
       .trim()
       .replace(/[^a-z0-9\s_-]/g, "")
-      .replace(/[\s-]+/g, "_");
+      .replace(/[\s_-]+/g, separator);
 
     figma.ui.postMessage({ type: "result", slug: slug });
   }
