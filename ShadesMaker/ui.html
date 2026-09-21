@@ -432,11 +432,11 @@
     </span>
   </button>
 
-  <!-- Create Color Variables -->
+  <!-- Create Color Styles -->
   <div class="prefix-row">
     <div class="prefix-label-row">
-      <span class="prefix-label">Variable Prefix</span>
-      <span class="prefix-preview" id="prefixPreview">e.g. &nbsp;<strong>green</strong>_5%</span>
+      <span class="prefix-label">Style Prefix</span>
+      <span class="prefix-preview" id="prefixPreview">e.g. &nbsp;<strong>green</strong>/5%</span>
     </div>
     <div class="prefix-input-wrap">
       <span class="prefix-input-badge">Prefix</span>
@@ -452,7 +452,7 @@
       <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
       <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
     </svg>
-    Create Color Variables
+    Create Color Styles
   </button>
 
   <!-- Toast notification -->
@@ -487,10 +487,10 @@
   prefixInput.addEventListener('input', function () {
     var val = prefixInput.value.trim();
     if (val) {
-      prefixPreview.innerHTML = '<strong>' + escapeHtml(val) + '</strong>_5%';
+      prefixPreview.innerHTML = '<strong>' + escapeHtml(val) + '</strong>/5%';
       prefixPreview.className = 'prefix-preview active';
     } else {
-      prefixPreview.innerHTML = 'e.g. &nbsp;<strong>green</strong>_5%';
+      prefixPreview.innerHTML = 'e.g. &nbsp;<strong>green</strong>/5%';
       prefixPreview.className = 'prefix-preview';
     }
   });
@@ -546,7 +546,7 @@
       return;
     }
     varsBtn.disabled = true;
-    varsBtn.textContent = 'Creating variables…';
+    varsBtn.textContent = 'Creating styles…';
     parent.postMessage({ pluginMessage: { type: 'create-variables', prefix: prefix } }, '*');
   });
 
@@ -600,7 +600,7 @@
       varsBtn.disabled = false;
       varsBtn.innerHTML =
         '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>'
-        + ' Create Color Variables';
+        + ' Create Color Styles';
       showToast('✓ ' + msg.message, 'success');
       return;
     }
@@ -608,7 +608,7 @@
       varsBtn.disabled = false;
       varsBtn.innerHTML =
         '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>'
-        + ' Create Color Variables';
+        + ' Create Color Styles';
       showToast('⚠ ' + msg.message, 'error');
       return;
     }

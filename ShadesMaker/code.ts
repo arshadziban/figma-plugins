@@ -195,48 +195,33 @@ async function buildColorScaleFrame(base: RGB): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Color variables generation
+// Color styles generation
 // ---------------------------------------------------------------------------
 
 /**
- * Creates a Figma Variable Collection named after the base color and adds
- * one COLOR variable per scale step (e.g. "5%", "10%", … "BASE", … "100%").
- * If a collection with the same name already exists it is reused, and any
- * variable that already exists inside it is simply updated.
+ * Creates one local paint (color) style per scale step, named
+ * "<prefix>/<label>" (e.g. "green/5%", "green/BASE", "green/100%") so Figma
+ * groups them in a folder. Existing styles with the same name are updated.
  */
 async function buildColorVariables(base: RGB, prefix: string): Promise<number> {
   const steps = generateScale(base);
-  const collectionName = prefix; // e.g. "green"
-
-  // Reuse existing collection or create a new one.
-  let collection = figma.variables
-    .getLocalVariableCollections()
-    .find((c) => c.name === collectionName);
-
-  if (!collection) {
-    collection = figma.variables.createVariableCollection(collectionName);
-  }
-
-  const modeId = collection.defaultModeId;
+  const existing = figma.getLocalPaintStyles();
 
   for (const step of steps) {
-    // e.g. "green_5%", "green_BASE", "green_100%"
-    const varName = prefix + '_' + step.label;
+    const styleName = prefix + '/' + step.label;
 
-    // Check if a variable with this name already exists in the collection.
-    let variable = figma.variables
-      .getLocalVariables("COLOR")
-      .find((v) => v.variableCollectionId === collection!.id && v.name === varName);
-
-    if (!variable) {
-      variable = figma.variables.createVariable(varName, collection, "COLOR");
+    let style = existing.find((s) => s.name === styleName);
+    if (!style) {
+      style = figma.createPaintStyle();
+      style.name = styleName;
     }
 
-    variable.setValueForMode(modeId, {
-      r: step.color.r,
-      g: step.color.g,
-      b: step.color.b,
-    });
+    style.paints = [
+      {
+        type: "SOLID",
+        color: { r: step.color.r, g: step.color.g, b: step.color.b },
+      },
+    ];
   }
 
   return steps.length;
@@ -304,10 +289,10 @@ figma.ui.onmessage = async (msg: { type: string }) => {
       const count = await buildColorVariables(base, prefix.trim());
       figma.ui.postMessage({
         type: "success-vars",
-        message: `${count} variables created in collection "${prefix.trim()}"`,
+        message: `${count} color styles created in "${prefix.trim()}"`,
       });
     } catch (err) {
-      figma.ui.postMessage({ type: "error-vars", message: "Failed to create color variables." });
+      figma.ui.postMessage({ type: "error-vars", message: "Failed to create color styles." });
     }
     return;
   }
