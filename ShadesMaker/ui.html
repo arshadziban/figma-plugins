@@ -228,12 +228,6 @@
   .generate-btn:hover:not(:disabled) { filter: brightness(1.07); }
   .generate-btn:active:not(:disabled) { transform: scale(0.985); }
   .generate-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-  .btn-arrow {
-    position: absolute;
-    right: 16px;
-    display: flex;
-    align-items: center;
-  }
 
   /* ── VARS BUTTON ─────────────────────────────────── */
   .vars-btn {
@@ -421,15 +415,7 @@
 
   <!-- Generate Scale Frame -->
   <button class="generate-btn" id="generateBtn" disabled>
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-    </svg>
     Generate 5% Scale Frame
-    <span class="btn-arrow">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-      </svg>
-    </span>
   </button>
 
   <!-- Create Color Styles -->
@@ -445,13 +431,6 @@
   </div>
 
   <button class="vars-btn" id="varsBtn" disabled>
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="3"/>
-      <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
-      <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
-      <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
-      <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
-    </svg>
     Create Color Styles
   </button>
 
@@ -578,19 +557,13 @@
     // Scale frame responses
     if (msg.type === 'success-scale') {
       generateBtn.disabled = false;
-      generateBtn.innerHTML =
-        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'
-        + ' Generate 5% Scale Frame '
-        + '<span class="btn-arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>';
+      generateBtn.textContent = 'Generate 5% Scale Frame';
       showToast('✓ ' + msg.message, 'success');
       return;
     }
     if (msg.type === 'error-scale') {
       generateBtn.disabled = false;
-      generateBtn.innerHTML =
-        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'
-        + ' Generate 5% Scale Frame '
-        + '<span class="btn-arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>';
+      generateBtn.textContent = 'Generate 5% Scale Frame';
       showToast('⚠ ' + msg.message, 'error');
       return;
     }
@@ -598,17 +571,13 @@
     // Color variables responses
     if (msg.type === 'success-vars') {
       varsBtn.disabled = false;
-      varsBtn.innerHTML =
-        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>'
-        + ' Create Color Styles';
+      varsBtn.textContent = 'Create Color Styles';
       showToast('✓ ' + msg.message, 'success');
       return;
     }
     if (msg.type === 'error-vars') {
       varsBtn.disabled = false;
-      varsBtn.innerHTML =
-        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>'
-        + ' Create Color Styles';
+      varsBtn.textContent = 'Create Color Styles';
       showToast('⚠ ' + msg.message, 'error');
       return;
     }

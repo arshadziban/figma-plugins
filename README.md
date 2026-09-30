@@ -6,7 +6,6 @@ A collection of Figma plugins built for design workflow.
 
 | Plugin | Description |
 |--------|-------------|
-| **Gradify** | Generates grainy gradient images and inserts them as filled rectangles on the canvas |
 | **ShadesMaker** | Generates a full color scale (5% steps) as an Auto Layout frame from a selected rectangle's fill color |
 | **Slugify** | Converts selected text or input into a URL-friendly slug and applies it to a layer |
 | **Squeezr** | Exports and compresses selected frames, groups, or shapes with thumbnail previews |
