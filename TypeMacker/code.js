@@ -9,6 +9,65 @@ async function getAvailableFonts() {
   return cachedFonts;
 }
 
+var WEIGHT_KEYWORDS = [
+  ["extrablack", 950], ["ultrablack", 950], ["black", 900], ["heavy", 900],
+  ["extrabold", 800], ["ultrabold", 800], ["semibold", 600], ["demibold", 600], ["demi", 600],
+  ["bold", 700], ["medium", 500], ["regular", 400], ["normal", 400], ["book", 400], ["roman", 400],
+  ["extralight", 200], ["ultralight", 200], ["light", 300], ["thin", 100], ["hairline", 100],
+];
+
+function normalizeStyle(style) {
+  return String(style || "").toLowerCase().replace(/[\s_-]/g, "");
+}
+
+function styleWeight(style) {
+  var s = normalizeStyle(style);
+  for (var i = 0; i < WEIGHT_KEYWORDS.length; i++) {
+    if (s.indexOf(WEIGHT_KEYWORDS[i][0]) !== -1) return WEIGHT_KEYWORDS[i][1];
+  }
+  return 400;
+}
+
+function isItalic(style) {
+  var s = normalizeStyle(style);
+  return s.indexOf("italic") !== -1 || s.indexOf("oblique") !== -1;
+}
+
+function styleWidth(style) {
+  var m = normalizeStyle(style).match(/condensed|compressed|narrow|expanded|extended|wide/);
+  return m ? m[0] : "";
+}
+
+// Map a requested style (e.g. "Semibold") to one the family actually has
+// (e.g. "SemiBold", "Semi Bold", or the nearest weight like "Medium").
+async function resolveFontStyle(family, requested) {
+  var fonts = await getAvailableFonts();
+  var styles = [];
+  for (var i = 0; i < fonts.length; i++) {
+    if (fonts[i].fontName.family === family) styles.push(fonts[i].fontName.style);
+  }
+  if (!styles.length) throw new Error('Font "' + family + '" is not available.');
+  if (styles.indexOf(requested) !== -1) return requested;
+
+  var target = normalizeStyle(requested);
+  for (var i = 0; i < styles.length; i++) {
+    if (normalizeStyle(styles[i]) === target) return styles[i];
+  }
+
+  var wantWeight = styleWeight(requested);
+  var wantItalic = isItalic(requested);
+  var wantWidth = styleWidth(requested);
+  var best = styles[0];
+  var bestScore = Infinity;
+  for (var i = 0; i < styles.length; i++) {
+    var score = Math.abs(styleWeight(styles[i]) - wantWeight);
+    if (isItalic(styles[i]) !== wantItalic) score += 1000;
+    if (styleWidth(styles[i]) !== wantWidth) score += 500;
+    if (score < bestScore) { bestScore = score; best = styles[i]; }
+  }
+  return best;
+}
+
 async function getExistingStyleMap() {
   var map = {};
   var styles = await figma.getLocalTextStylesAsync();
@@ -33,18 +92,18 @@ async function generateTextStyles(rows, opts) {
   var existingStyles = await getExistingStyleMap();
 
   var loadedFonts = {};
-  async function ensureFontLoaded(family, style) {
-    var key = family + "|" + style;
-    if (loadedFonts[key]) return;
-    await figma.loadFontAsync({ family: family, style: style });
-    loadedFonts[key] = true;
+  async function ensureFontLoaded(family, requestedStyle) {
+    var key = family + "|" + requestedStyle;
+    if (loadedFonts[key]) return loadedFonts[key];
+    var style = await resolveFontStyle(family, requestedStyle);
+    try {
+      await figma.loadFontAsync({ family: family, style: style });
+    } catch (e) {
+      throw new Error('Could not load "' + family + " " + style + '".');
+    }
+    loadedFonts[key] = style;
+    return style;
   }
-
-  var hasPerRowFont = false;
-  for (var i = 0; i < rows.length; i++) {
-    if (rows[i].fontFamily) hasPerRowFont = true;
-  }
-  if (!hasPerRowFont) await ensureFontLoaded(defaultFontFamily, defaultFontWeight);
 
   var created = { styles: 0 };
 
@@ -55,8 +114,7 @@ async function generateTextStyles(rows, opts) {
     if (!baseName) continue;
 
     var rowFontFamily = row.fontFamily || defaultFontFamily;
-    var rowFontStyle = row.style || row.fontStyle || defaultFontWeight;
-    await ensureFontLoaded(rowFontFamily, rowFontStyle);
+    var rowFontStyle = await ensureFontLoaded(rowFontFamily, row.style || row.fontStyle || defaultFontWeight);
 
     for (var b = 0; b < breakpoints.length; b++) {
       var bpKey = breakpoints[b];
@@ -207,6 +265,6 @@ figma.ui.onmessage = async function (msg) {
         break;
     }
   } catch (err) {
-    figma.ui.postMessage({ type: "generate-error", error: err.message });
+    figma.ui.postMessage({ type: "generate-error", error: (err && err.message) || String(err) });
   }
 };
