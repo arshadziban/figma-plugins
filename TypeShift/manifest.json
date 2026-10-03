@@ -1,6 +1,6 @@
 {
-  "name": "Font Changer",
-  "id": "font-changer-text-styles",
+  "name": "TypeShift",
+  "id": "typeshift-text-styles",
   "api": "1.0.0",
   "main": "code.js",
   "ui": "ui.html",

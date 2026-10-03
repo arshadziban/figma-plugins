@@ -1,4 +1,4 @@
-figma.showUI(__html__, { width: 400, height: 720, title: "Font Changer", themeColors: true });
+figma.showUI(__html__, { width: 400, height: 720, title: "TypeShift", themeColors: true });
 
 var cachedFonts = null;
 

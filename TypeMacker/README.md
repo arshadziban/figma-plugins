@@ -2,6 +2,8 @@
 
 Type Maker is a Figma plugin that generates a responsive typography system as local text styles. It builds a complete type scale from a preset, from values you define, or from text layers already on the canvas, and writes one text style per breakpoint (Desktop, Tablet, Mobile).
 
+![Type Maker plugin UI](image.png)
+
 ## Features
 
 - Three ways to build a scale: presets, a custom table, or detection from selected text layers.

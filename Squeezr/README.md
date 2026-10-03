@@ -2,6 +2,8 @@
 
 Squeezr is a Figma plugin that exports selected layers as JPEG or WebP images compressed to a target file size. It keeps the original dimensions and searches for the highest quality setting that fits within the size you set. All processing happens locally inside the plugin, and no image data leaves your machine.
 
+![Squeezr plugin UI](image.png)
+
 ## Features
 
 - Exports frames, groups, components, instances, sections, shapes and text layers.

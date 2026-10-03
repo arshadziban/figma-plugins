@@ -2,6 +2,8 @@
 
 Slugify is a Figma plugin that converts text into a clean, lowercase slug and applies it to the current selection. Selected text layers have their content replaced with the slug. Any other selected layers are renamed to it.
 
+![Slugify plugin UI](slugify.png)
+
 ## Features
 
 - Converts text to a slug as you type, with a live preview.

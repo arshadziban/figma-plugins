@@ -1,6 +1,8 @@
-# Font Changer
+# TypeShift
 
-Font Changer is a Figma plugin that changes the font family, line height and letter spacing of local text styles. Choose the values to change, tick the text styles to update, and every selected style gets the new values. When the font changes, each style keeps its weight where the new font has it, and falls back to the closest weight where it does not.
+TypeShift is a Figma plugin that changes the font family, line height and letter spacing of local text styles. Choose the values to change, tick the text styles to update, and every selected style gets the new values. When the font changes, each style keeps its weight where the new font has it, and falls back to the closest weight where it does not.
+
+![TypeShift plugin UI](image.png)
 
 ## Features
 
@@ -22,8 +24,8 @@ The plugin is loaded as a development plugin from this repository.
 
 1. Open the Figma desktop app.
 2. Go to **Plugins > Development > Import plugin from manifest**.
-3. Select `Font_Changer/manifest.json`.
-4. Run it from **Plugins > Development > Font Changer**.
+3. Select `TypeShift/manifest.json`.
+4. Run it from **Plugins > Development > TypeShift**.
 
 There is no build step. `code.js` and `ui.html` are loaded by Figma as they are.
 

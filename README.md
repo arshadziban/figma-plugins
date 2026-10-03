@@ -9,9 +9,19 @@ A collection of Figma plugins built for design workflow.
 | **ShadesMaker** | Generates a full color scale (5% steps) as an Auto Layout frame from a selected rectangle's fill color |
 | **Slugify** | Converts selected text or input into a URL-friendly slug and applies it to a layer |
 | **Squeezr** | Exports and compresses selected frames, groups, or shapes with thumbnail previews |
-| **TextFlow** | Applies a chosen color to selected text layers, including nested text inside frames and groups |
 | **TypeMacker** | Creates typography scales and text styles from presets, custom values, or existing selected layers |
+| **TypeShift** | Updates the font family, weight, line height and letter spacing of multiple local text styles at once |
 | **VivaFrame** | Frame creation tool with branding assets for Vivasoftio |
+
+## Previews
+
+| ShadesMaker | Slugify | Squeezr |
+|:-----------:|:-------:|:-------:|
+| <img src="ShadesMaker/shadesMacker.png" width="260" alt="ShadesMaker"> | <img src="Slugify/slugify.png" width="260" alt="Slugify"> | <img src="Squeezr/image.png" width="260" alt="Squeezr"> |
+
+| TypeMacker | TypeShift | VivaFrame |
+|:----------:|:---------:|:---------:|
+| <img src="TypeMacker/image.png" width="260" alt="TypeMacker"> | <img src="TypeShift/image.png" width="260" alt="TypeShift"> | <img src="VivaFrame/image.png" width="260" alt="VivaFrame"> |
 
 ## Usage
 

@@ -2,6 +2,8 @@
 
 Shades Maker is a Figma plugin that generates a 20-step color scale from the solid fill of a selected layer. The scale can be placed on the canvas as an Auto Layout reference frame, saved as local color styles, or both.
 
+![Shades Maker plugin UI](shadesMacker.png)
+
 ## Features
 
 - Generates 20 steps in 5% increments, from a light tint (5%) through the exact base color (50%) to a deep shade (100%).
