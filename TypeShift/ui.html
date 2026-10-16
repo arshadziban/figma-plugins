@@ -255,12 +255,9 @@
   <div class="header">
     <div class="header-row">
       <div class="logo">Tt</div>
-      <div class="title">Update Text Styles</div>
-      <button class="icon-btn" id="close" title="Close">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg>
-      </button>
+      <div class="title" id="title">Update Text Styles</div>
     </div>
-    <div class="subtitle">Update multiple text styles at once. Choose a new font, weight, line height and letter spacing.</div>
+    <div class="subtitle" id="subtitle">Update multiple text styles at once. Choose a new font, weight, line height and letter spacing.</div>
   </div>
 
   <div class="main">
@@ -329,7 +326,7 @@
     <!-- ── TEXT STYLES ──────────────────────────────── -->
     <div class="card styles">
       <div class="styles-head">
-        <div class="label">Text Styles</div>
+        <div class="label" id="list-label">Text Styles</div>
         <div class="styles-count" id="style-count"></div>
       </div>
 
@@ -382,6 +379,9 @@
   var applying = false;
   var chosenFamily = "";
   var filter = ""; // "" = all, "__selected" = ticked styles, otherwise a font family
+  var mode = "styles"; // "styles" = local text styles, "selection" = text in the selected layers
+  var selectionKey = "";
+  var layerCount = 0;
 
   var familyInput = document.getElementById("family");
   var combo = document.getElementById("combo");
@@ -406,6 +406,22 @@
   var toast = document.getElementById("toast");
   var toastIcon = document.getElementById("toast-icon");
   var toastText = document.getElementById("toast-text");
+  var titleEl = document.getElementById("title");
+  var subtitleEl = document.getElementById("subtitle");
+  var listLabel = document.getElementById("list-label");
+
+  // In selection mode each list item is a font (family, weight, size, spacing) used in the selected layers.
+  function itemWord() { return mode === "selection" ? "font" : "style"; }
+
+  function renderMode() {
+    var sel = mode === "selection";
+    titleEl.textContent = sel ? "Update Selected Text" : "Update Text Styles";
+    subtitleEl.textContent = sel
+      ? "Change the fonts used in the selected frames, groups and text layers. Deselect everything to edit text styles."
+      : "Update multiple text styles at once. Choose a new font, weight, line height and letter spacing.";
+    listLabel.textContent = sel ? "Text in Selection" : "Text Styles";
+    searchInput.placeholder = sel ? "Search fonts in selection..." : "Search styles...";
+  }
 
   function post(msg) { parent.postMessage({ pluginMessage: msg }, "*"); }
 
@@ -416,8 +432,6 @@
   }
 
   function plural(n, word) { return n + " " + word + (n === 1 ? "" : "s"); }
-
-  document.getElementById("close").addEventListener("click", function () { post({ type: "close" }); });
 
   // ── Toast ────────────────────────────────────────
 
@@ -719,7 +733,7 @@
       '<input type="checkbox" class="check" data-id="' + escapeHtml(s.id) + '"' + (selected[s.id] ? " checked" : "") + " />" +
       '<div class="item-text">' +
         '<div class="item-name"><span>' + escapeHtml(s.name) + "</span>" + badgeHtml(notes[s.id]) + "</div>" +
-        '<div class="item-meta">' + escapeHtml(s.family + " · " + s.style) + "</div>" +
+        '<div class="item-meta">' + escapeHtml(s.layers != null ? plural(s.layers, "layer") : s.family + " · " + s.style) + "</div>" +
       "</div>" +
       '<div class="item-size"><div>' + escapeHtml(s.size) + ' px</div><div>' + escapeHtml(s.lineHeight + " · " + s.letterSpacing) + "</div></div>" +
       '<svg class="chev" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2.5L9.5 7 5 11.5"/></svg>' +
@@ -727,20 +741,25 @@
   }
 
   function renderList() {
-    styleCount.textContent = textStyles.length ? plural(textStyles.length, "style") : "";
+    renderMode();
+    styleCount.textContent = !textStyles.length ? ""
+      : mode === "selection" ? plural(textStyles.length, "font") + " · " + plural(layerCount, "layer")
+      : plural(textStyles.length, "style");
     renderChips();
 
     if (!textStyles.length) {
-      listEl.innerHTML =
-        '<div class="empty"><div class="empty-title">No local text styles</div>' +
-        "Create text styles in the Design panel. They will appear here automatically.</div>";
+      listEl.innerHTML = mode === "selection"
+        ? '<div class="empty"><div class="empty-title">No text in selection</div>' +
+          "Select frames, groups or text layers that contain text, or deselect everything to edit text styles.</div>"
+        : '<div class="empty"><div class="empty-title">No local text styles</div>' +
+          "Create text styles in the Design panel, or select frames or groups to edit their text.</div>";
       updateControls();
       return;
     }
 
     var visible = visibleStyles();
     if (!visible.length) {
-      listEl.innerHTML = '<div class="empty"><div class="empty-title">No matching styles</div>Try a different search or filter.</div>';
+      listEl.innerHTML = '<div class="empty"><div class="empty-title">No matching ' + itemWord() + 's</div>Try a different search or filter.</div>';
       updateControls();
       return;
     }
@@ -776,7 +795,7 @@
     var hasChange = !!changes && !!(changes.family || changes.lineHeight || changes.letterSpacing);
     applyBtn.disabled = applying || !hasChange || !count;
     applyLabel.textContent = applying ? "Applying…" : "Apply Changes";
-    selectedLabel.textContent = plural(count, "style") + " selected";
+    selectedLabel.textContent = plural(count, itemWord()) + " selected";
 
     var visible = visibleStyles();
     var allOn = visible.length && visible.every(function (s) { return selected[s.id]; });
@@ -792,7 +811,7 @@
     applyBtn.classList.add("loading");
     hideToast();
     updateControls();
-    post({ type: "apply", styleIds: ids, options: changes });
+    post({ type: "apply", mode: mode, styleIds: ids, options: changes });
   }
 
   function finishApply() {
@@ -825,7 +844,20 @@
         break;
 
       case "text-styles": {
+        var nextMode = msg.mode || "styles";
+        var nextKey = msg.selectionKey || "";
         textStyles = msg.styles;
+        layerCount = msg.layers || 0;
+        if (nextMode !== mode || nextKey !== selectionKey) {
+          // A new selection (or switching between styles and selection) starts fresh;
+          // a selection's fonts are all ticked, since selecting layers is the intent to change them.
+          mode = nextMode;
+          selectionKey = nextKey;
+          selected = {};
+          notes = {};
+          filter = "";
+          if (mode === "selection") textStyles.forEach(function (s) { selected[s.id] = true; });
+        }
         var ids = {};
         textStyles.forEach(function (s) { ids[s.id] = true; });
         Object.keys(selected).forEach(function (id) { if (!ids[id]) delete selected[id]; });
@@ -839,17 +871,23 @@
         var fallbacks = 0;
         var failed = 0;
         msg.results.forEach(function (r) {
+          // Editing selected text changes its font, so its list item comes back under a new id.
+          var id = r.newId || r.id;
+          if (r.newId && r.newId !== r.id && selected[r.id]) {
+            delete selected[r.id];
+            selected[r.newId] = true;
+          }
           if (!r.ok) {
             failed++;
-            notes[r.id] = { kind: "error", text: "Failed", title: r.error };
+            notes[id] = { kind: "error", text: "Failed", title: r.error };
           } else if (r.fallback) {
             fallbacks++;
-            notes[r.id] = { kind: "warn", text: "→ " + r.to, title: "No \"" + r.from + "\" in this font. Used \"" + r.to + "\"." };
-          } else {
-            notes[r.id] = { kind: "success", text: "Updated" };
+            notes[id] = { kind: "warn", text: "→ " + r.to, title: "No \"" + r.from + "\" in this font. Used \"" + r.to + "\"." };
+          } else if (!notes[id]) {
+            notes[id] = { kind: "success", text: "Updated" };
           }
         });
-        var text = "Updated " + plural(msg.updated, "style") + ".";
+        var text = "Updated " + plural(msg.updated, msg.mode === "selection" ? "text layer" : "style") + ".";
         if (fallbacks) text += " " + fallbacks + " used the nearest weight.";
         if (failed) text += " " + failed + " failed. Hover the badge for details.";
         showToast(text, failed ? "error" : "success");

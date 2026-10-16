@@ -6,6 +6,7 @@ A collection of Figma plugins built for design workflow.
 
 | Plugin | Description |
 |--------|-------------|
+| **Recase** | Converts every text layer in selected frames or groups to a chosen case (UPPERCASE, Title Case, camelCase…) or custom text |
 | **ShadesMaker** | Generates a full color scale (5% steps) as an Auto Layout frame from a selected rectangle's fill color |
 | **Slugify** | Converts selected text or input into a URL-friendly slug and applies it to a layer |
 | **Squeezr** | Exports and compresses selected frames, groups, or shapes with thumbnail previews |
