@@ -226,6 +226,7 @@ async function updateSelectionText(keys, opts) {
 
       try {
         if (family) node.setRangeFontName(seg.start, seg.end, fontName);
+        if (opts.fontSize) node.setRangeFontSize(seg.start, seg.end, opts.fontSize);
         if (opts.lineHeight) node.setRangeLineHeight(seg.start, seg.end, opts.lineHeight);
         if (opts.letterSpacing) node.setRangeLetterSpacing(seg.start, seg.end, opts.letterSpacing);
       } catch (e) {
@@ -238,7 +239,7 @@ async function updateSelectionText(keys, opts) {
         results[key] = {
           id: key,
           // The group's key after the edit, so the UI can keep it ticked.
-          newId: segmentKey(fontName, seg.fontSize, opts.lineHeight || seg.lineHeight, opts.letterSpacing || seg.letterSpacing),
+          newId: segmentKey(fontName, opts.fontSize || seg.fontSize, opts.lineHeight || seg.lineHeight, opts.letterSpacing || seg.letterSpacing),
           ok: true,
           fallback: !!family && !forcedStyle && normalizeStyle(fontName.style) !== normalizeStyle(from.style),
           from: from.style,
@@ -254,7 +255,7 @@ async function updateSelectionText(keys, opts) {
 
 // ── Text styles ────────────────────────────────
 
-// opts: { family, style, lineHeight, letterSpacing }; any of them may be null to keep the style's value.
+// opts: { family, style, fontSize, lineHeight, letterSpacing }; any of them may be null to keep the style's value.
 async function updateTextStyles(styleIds, opts) {
   var family = opts.family || null;
   var forcedStyle = opts.style || null;
@@ -287,6 +288,7 @@ async function updateTextStyles(styleIds, opts) {
     }
 
     if (family) textStyle.fontName = fontName;
+    if (opts.fontSize) textStyle.fontSize = opts.fontSize;
     if (opts.lineHeight) textStyle.lineHeight = opts.lineHeight;
     if (opts.letterSpacing) textStyle.letterSpacing = opts.letterSpacing;
     updated++;

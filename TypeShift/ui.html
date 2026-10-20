@@ -257,7 +257,7 @@
       <div class="logo">Tt</div>
       <div class="title" id="title">Update Text Styles</div>
     </div>
-    <div class="subtitle" id="subtitle">Update multiple text styles at once. Choose a new font, weight, line height and letter spacing.</div>
+    <div class="subtitle" id="subtitle">Update multiple text styles at once. Choose a new font, weight, size, line height and letter spacing.</div>
   </div>
 
   <div class="main">
@@ -295,6 +295,14 @@
           <option value="">Keep original (match weight)</option>
         </select>
         <svg class="trail" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5L6 8l3.5-3.5"/></svg>
+      </div>
+
+      <div style="margin-top: 14px;">
+        <div class="label-row"><div class="label">Font Size</div></div>
+        <div class="input" id="font-size-box">
+          <input type="text" id="font-size" placeholder="e.g. 16" autocomplete="off" spellcheck="false" />
+        </div>
+        <div class="hint">Use 16 or 16px.</div>
       </div>
 
       <div class="grid" style="margin-top: 14px;">
@@ -391,6 +399,8 @@
   var chosenMeta = document.getElementById("chosen-meta");
   var weightSelect = document.getElementById("weight");
   var weightBox = document.getElementById("weight-box");
+  var fontSizeInput = document.getElementById("font-size");
+  var fontSizeBox = document.getElementById("font-size-box");
   var lineHeightInput = document.getElementById("line-height");
   var lineHeightBox = document.getElementById("line-height-box");
   var letterSpacingInput = document.getElementById("letter-spacing");
@@ -418,7 +428,7 @@
     titleEl.textContent = sel ? "Update Selected Text" : "Update Text Styles";
     subtitleEl.textContent = sel
       ? "Change the fonts used in the selected frames, groups and text layers. Deselect everything to edit text styles."
-      : "Update multiple text styles at once. Choose a new font, weight, line height and letter spacing.";
+      : "Update multiple text styles at once. Choose a new font, weight, size, line height and letter spacing.";
     listLabel.textContent = sel ? "Text in Selection" : "Text Styles";
     searchInput.placeholder = sel ? "Search fonts in selection..." : "Search styles...";
   }
@@ -457,6 +467,15 @@
 
   function targetFamily() { return chosenFamily || null; }
 
+  // "" → keep, "16" or "16px" → size in px. Returns undefined if invalid.
+  function parseFontSize(raw) {
+    var s = raw.trim().toLowerCase();
+    if (!s) return null;
+    var m = s.match(/^(\d*\.?\d+)\s*(px)?$/);
+    if (!m || !(parseFloat(m[1]) > 0)) return undefined;
+    return parseFloat(m[1]);
+  }
+
   // "" → keep, "auto" → AUTO, "150%" → PERCENT, "24" or "24px" → PIXELS. Returns undefined if invalid.
   function parseLineHeight(raw) {
     var s = raw.trim().toLowerCase();
@@ -479,14 +498,17 @@
   // Returns the changes requested in the form, or null if a field is invalid.
   function pendingChanges() {
     var family = targetFamily();
+    var fontSize = parseFontSize(fontSizeInput.value);
     var lineHeight = parseLineHeight(lineHeightInput.value);
     var letterSpacing = parseLetterSpacing(letterSpacingInput.value);
+    fontSizeBox.classList.toggle("invalid", fontSize === undefined);
     lineHeightBox.classList.toggle("invalid", lineHeight === undefined);
     letterSpacingBox.classList.toggle("invalid", letterSpacing === undefined);
-    if (lineHeight === undefined || letterSpacing === undefined) return null;
+    if (fontSize === undefined || lineHeight === undefined || letterSpacing === undefined) return null;
     return {
       family: family,
       style: family ? weightSelect.value : "",
+      fontSize: fontSize,
       lineHeight: lineHeight,
       letterSpacing: letterSpacing,
     };
@@ -669,12 +691,14 @@
   }
 
   weightSelect.addEventListener("change", updateControls);
+  fontSizeInput.addEventListener("input", updateControls);
   lineHeightInput.addEventListener("input", updateControls);
   letterSpacingInput.addEventListener("input", updateControls);
 
   document.getElementById("reset").addEventListener("click", function () {
     chosenFamily = "";
     familyInput.value = "";
+    fontSizeInput.value = "";
     lineHeightInput.value = "";
     letterSpacingInput.value = "";
     onFamilyChanged();
@@ -791,8 +815,8 @@
   function updateControls() {
     var changes = pendingChanges();
     var count = selectedIds().length;
-    document.getElementById("reset").hidden = !(chosenFamily || lineHeightInput.value || letterSpacingInput.value);
-    var hasChange = !!changes && !!(changes.family || changes.lineHeight || changes.letterSpacing);
+    document.getElementById("reset").hidden = !(chosenFamily || fontSizeInput.value || lineHeightInput.value || letterSpacingInput.value);
+    var hasChange = !!changes && !!(changes.family || changes.fontSize || changes.lineHeight || changes.letterSpacing);
     applyBtn.disabled = applying || !hasChange || !count;
     applyLabel.textContent = applying ? "Applying…" : "Apply Changes";
     selectedLabel.textContent = plural(count, itemWord()) + " selected";
@@ -806,7 +830,7 @@
   function apply() {
     var changes = pendingChanges();
     var ids = selectedIds();
-    if (applying || !changes || !ids.length || !(changes.family || changes.lineHeight || changes.letterSpacing)) return;
+    if (applying || !changes || !ids.length || !(changes.family || changes.fontSize || changes.lineHeight || changes.letterSpacing)) return;
     applying = true;
     applyBtn.classList.add("loading");
     hideToast();
