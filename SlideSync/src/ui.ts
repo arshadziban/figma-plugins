@@ -22,6 +22,7 @@ type View = 'idle' | 'exporting' | 'done' | 'error' | 'cancelled';
 
 let frames: FrameInfo[] = [];
 const excluded = new Set<string>();
+const seen = new Set<string>();
 const thumbs = new Map<string, string>();
 let view: View = 'idle';
 let layout: DeckLayout = { widthIn: 10, heightIn: 5.625 };
@@ -145,12 +146,32 @@ function createSelect(id: string, choices: SelectOption[], initial: string): voi
 
 const selectValue = (id: string): string => selectValues.get(id) ?? '';
 
-createSelect(
+/** Segmented control for a small, always-visible choice. Shares selectValues so selectValue(id) works. */
+function createSegmented(id: string, choices: SelectOption[], initial: string): void {
+  const host = $(id);
+  selectValues.set(id, initial);
+  const buttons = choices.map((c) => {
+    const b = el('button', 'seg-btn');
+    b.type = 'button';
+    b.append(document.createTextNode(c.label), el('small', '', c.hint ?? ''));
+    if (c.badge) b.append(el('span', 'badge', c.badge));
+    b.addEventListener('click', () => {
+      selectValues.set(id, c.value);
+      paint();
+    });
+    host.append(b);
+    return b;
+  });
+  const paint = (): void => buttons.forEach((b, i) => b.setAttribute('aria-pressed', String(choices[i]?.value === selectValues.get(id))));
+  paint();
+}
+
+createSegmented(
   'resolution',
   [
-    { value: '1', label: '1x', hint: 'Smallest file, softer images' },
-    { value: '2', label: '2x', hint: 'Sharp on most screens' },
-    { value: '3', label: '3x', hint: 'Sharpest, largest file', badge: 'Recommended' },
+    { value: '1', label: '1x', hint: 'Smallest' },
+    { value: '2', label: '2x', hint: 'Balanced' },
+    { value: '3', label: '3x', hint: 'Sharpest', badge: 'Best' },
   ],
   '3',
 );
@@ -246,7 +267,8 @@ function menuFor(f: FrameInfo): HTMLElement {
 }
 
 function frameRow(f: FrameInfo): HTMLLIElement {
-  const li = el('li', `frame${excluded.has(f.id) ? ' excluded' : ''}`);
+  const li = el('li', `frame${excluded.has(f.id) ? ' excluded' : ''}${seen.has(f.id) ? '' : ' enter'}`);
+  seen.add(f.id);
   li.draggable = true;
   const thumbUrl = thumbs.get(f.id);
   const thumb = el('img', 'thumb');
@@ -262,7 +284,19 @@ function frameRow(f: FrameInfo): HTMLLIElement {
     openMenuId = openMenuId === f.id ? null : f.id;
     renderFrames();
   });
-  li.append(el('span', 'grip', '⋮⋮'), thumb, info, ratio, more);
+  const included = !excluded.has(f.id);
+  const idx = el('button', 'idx', included ? String(includedFrames().indexOf(f) + 1) : '–');
+  idx.type = 'button';
+  idx.title = included ? 'Slide number. Click to exclude from export' : 'Excluded. Click to include';
+  idx.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (included) excluded.add(f.id);
+    else excluded.delete(f.id);
+    renderFrames();
+  });
+  info.title = 'Select in Figma';
+  info.addEventListener('click', () => post({ type: 'reveal', nodeId: f.id }));
+  li.append(el('span', 'grip', '⋮⋮'), idx, thumb, info, ratio, more);
   if (openMenuId === f.id) li.append(menuFor(f));
   li.addEventListener('dragstart', () => {
     dragId = f.id;
