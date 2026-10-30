@@ -88,7 +88,7 @@ function frameInfo(f: FrameNode | ComponentNode): FrameInfo {
 }
 
 function defaultFileName(): string {
-  return `${figma.root.name} ${new Date().toISOString().slice(0, 10)}`;
+  return `my_slide ${new Date().toISOString().slice(0, 10)}`;
 }
 
 function describeSelection(): string {
