@@ -265,7 +265,9 @@ function matrixOf(node: SceneNode): Matrix {
 // ---- Layer description (Figma node -> LayerInfo) --------------------------
 
 function paintInfo(paints: ReadonlyArray<Paint> | PluginAPI['mixed'] | undefined): PaintInfo[] {
-  if (!paints || paints === figma.mixed) return [{ type: 'OTHER', visible: true }];
+  // Groups have no fills at all: that is "no paint", not "unknown paint".
+  if (!paints) return [];
+  if (paints === figma.mixed) return [{ type: 'OTHER', visible: true }];
   return paints.map((p) => ({
     visible: p.visible !== false,
     type: p.type === 'SOLID' ? 'SOLID' : p.type.startsWith('GRADIENT') ? 'GRADIENT' : p.type === 'IMAGE' ? 'IMAGE' : 'OTHER',
@@ -331,6 +333,7 @@ function describe(node: SceneNode, options: ExportOptions): LayerInfo {
     uniformCornerRadius: cornerInfo(node),
     hasArcData: node.type === 'ELLIPSE' && (node.arcData.endingAngle - node.arcData.startingAngle !== Math.PI * 2 || node.arcData.innerRadius > 0),
     textNonSolidFill: textNonSolid,
+    ungroup: options.ungroupGroups,
     gradientTextAsSolid: gradientSolid,
     rasterizeFont,
   };

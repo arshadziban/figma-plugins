@@ -113,6 +113,8 @@ export interface ExportOptions {
   /** PNG resolution multiplier relative to the slide's display size (1, 2 or 3). */
   resolution: 1 | 2 | 3;
   rasterizeNonGoogleFonts: boolean;
+  /** Walk groups layer by layer instead of exporting each group as one image. */
+  ungroupGroups: boolean;
   /** 'solid' keeps gradient text editable using its average colour; 'image' keeps the look. */
   gradientText: 'image' | 'solid';
   layerReport: boolean;

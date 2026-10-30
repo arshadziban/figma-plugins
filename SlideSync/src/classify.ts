@@ -29,6 +29,8 @@ export interface LayerInfo {
   hasArcData: boolean;
   /** TEXT only: a visible fill is gradient/image. */
   textNonSolidFill: boolean;
+  /** User option: export a group's children separately. */
+  ungroup: boolean;
   /** TEXT only: the non-solid fill is a gradient (not an image) and the user chose editable text. */
   gradientTextAsSolid: boolean;
   /** TEXT only: rasterize because its font isn't a Google Font and the option is on. */
@@ -102,6 +104,11 @@ function classifyContainer(info: LayerInfo): Classification {
     return info.hasTextDescendant
       ? image('mask group', { kind: 'mask', message: 'Mask group exported as one image; its text is not editable.' })
       : image('mask group');
+  }
+  // Mask groups, and groups whose effect/blend belongs to the group as a whole, stay one image above/below.
+  const keepsLook = info.hasEffects || !isNormalBlend(info.blendMode);
+  if (info.type === 'GROUP' && info.ungroup && !keepsLook && !info.flipped && info.hasVisibleChild) {
+    return { kind: 'container', reason: 'ungrouped group' };
   }
   if (!info.hasTextDescendant) {
     const paints = visiblePaints(info.fills).length + visiblePaints(info.strokes).length;

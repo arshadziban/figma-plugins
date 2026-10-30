@@ -149,10 +149,10 @@ createSelect(
   'resolution',
   [
     { value: '1', label: '1x', hint: 'Smallest file, softer images' },
-    { value: '2', label: '2x', hint: 'Sharp on most screens', badge: 'Recommended' },
-    { value: '3', label: '3x', hint: 'Sharpest, largest file' },
+    { value: '2', label: '2x', hint: 'Sharp on most screens' },
+    { value: '3', label: '3x', hint: 'Sharpest, largest file', badge: 'Recommended' },
   ],
-  '2',
+  '3',
 );
 createSelect(
   'gradientText',
@@ -481,6 +481,7 @@ function options(): ExportOptions {
   return {
     resolution: Number(selectValue('resolution')) as 1 | 2 | 3,
     gradientText: selectValue('gradientText') === 'image' ? 'image' : 'solid',
+    ungroupGroups: $<HTMLInputElement>('ungroup').checked,
     rasterizeNonGoogleFonts: $<HTMLInputElement>('rasterFonts').checked,
     layerReport: $<HTMLInputElement>('report').checked,
     filename: $<HTMLInputElement>('filename').value.trim() || 'SlideSync export',
