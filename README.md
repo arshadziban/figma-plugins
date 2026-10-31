@@ -6,8 +6,9 @@ A collection of Figma plugins built for design workflow.
 
 | Plugin | Description |
 |--------|-------------|
-| **Recase** | Converts every text layer in selected frames or groups to a chosen case (UPPERCASE, Title Case, camelCase…) or custom text |
+| **Gradify** | Adds a soft blurred-blob gradient behind selected frames from one colour you pick, with 128 styles, moods, adjustments and ◀ ▶ browsing (React + TypeScript) |
 | **ShadesMaker** | Generates a full color scale (5% steps) as an Auto Layout frame from a selected rectangle's fill color |
+| **SlideSync** | Exports selected frames to one editable `.pptx` (one slide per frame), keeping text editable and layer names intact |
 | **Slugify** | Converts selected text or input into a URL-friendly slug and applies it to a layer |
 | **Squeezr** | Exports and compresses selected frames, groups, or shapes with thumbnail previews |
 | **TypeMacker** | Creates typography scales and text styles from presets, custom values, or existing selected layers |
@@ -16,16 +17,22 @@ A collection of Figma plugins built for design workflow.
 
 ## Previews
 
-| ShadesMaker | Slugify | Squeezr |
-|:-----------:|:-------:|:-------:|
-| <img src="ShadesMaker/shadesMacker.png" width="260" alt="ShadesMaker"> | <img src="Slugify/slugify.png" width="260" alt="Slugify"> | <img src="Squeezr/image.png" width="260" alt="Squeezr"> |
+| Gradify | ShadesMaker | SlideSync |
+|:-------:|:-----------:|:---------:|
+| <img src="Gradify/image.png" width="260" alt="Gradify"> | <img src="ShadesMaker/shadesMacker.png" width="260" alt="ShadesMaker"> | <img src="SlideSync/image.png" width="260" alt="SlideSync"> |
 
-| TypeMacker | TypeShift | VivaFrame |
-|:----------:|:---------:|:---------:|
-| <img src="TypeMacker/image.png" width="260" alt="TypeMacker"> | <img src="TypeShift/image.png" width="260" alt="TypeShift"> | <img src="VivaFrame/image.png" width="260" alt="VivaFrame"> |
+| Slugify | Squeezr | TypeMacker |
+|:-------:|:-------:|:----------:|
+| <img src="Slugify/slugify.png" width="260" alt="Slugify"> | <img src="Squeezr/image.png" width="260" alt="Squeezr"> | <img src="TypeMacker/image.png" width="260" alt="TypeMacker"> |
+
+| TypeShift | VivaFrame |
+|:---------:|:---------:|
+| <img src="TypeShift/image.png" width="260" alt="TypeShift"> | <img src="VivaFrame/image.png" width="260" alt="VivaFrame"> |
 
 ## Usage
 
 1. Open Figma and go to **Plugins -> Development -> Import plugin from manifest**
 2. Select the `manifest.json` inside any plugin folder
 3. Run the plugin from the Plugins menu
+
+Gradify and SlideSync must be built first (`npm install && npm run build` inside the plugin folder); see [Gradify/README.md](Gradify/README.md) and [SlideSync/README.md](SlideSync/README.md).
