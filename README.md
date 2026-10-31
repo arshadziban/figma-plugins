@@ -13,7 +13,6 @@ A collection of Figma plugins built for design workflow.
 | **Squeezr** | Exports and compresses selected frames, groups, or shapes with thumbnail previews |
 | **TypeMacker** | Creates typography scales and text styles from presets, custom values, or existing selected layers |
 | **TypeShift** | Updates the font family, weight, line height and letter spacing of multiple local text styles at once |
-| **VivaFrame** | Frame creation tool with branding assets for Vivasoftio |
 
 ## Previews
 
@@ -25,9 +24,9 @@ A collection of Figma plugins built for design workflow.
 |:-------:|:-------:|:----------:|
 | <img src="Slugify/slugify.png" width="260" alt="Slugify"> | <img src="Squeezr/image.png" width="260" alt="Squeezr"> | <img src="TypeMacker/image.png" width="260" alt="TypeMacker"> |
 
-| TypeShift | VivaFrame |
-|:---------:|:---------:|
-| <img src="TypeShift/image.png" width="260" alt="TypeShift"> | <img src="VivaFrame/image.png" width="260" alt="VivaFrame"> |
+| TypeShift |
+|:---------:|
+| <img src="TypeShift/image.png" width="260" alt="TypeShift"> |
 
 ## Usage
 
