@@ -1,8 +1,36 @@
 # PSD2Fig
 
-PSD2Fig imports a Photoshop `.psd` into Figma as **editable layers**, not a flat picture. Drop a file in the plugin window and it builds a new frame next to your existing content.
+PSD2Fig is a Figma plugin that imports a Photoshop `.psd` file as **editable layers**, not a flat picture. Drop a file in the plugin window and it builds a new frame next to your existing content.
+
+![PSD2Fig plugin UI](image.png)
 
 Built with TypeScript, esbuild and [ag-psd](https://github.com/Agamnentzar/ag-psd). The PSD is parsed locally in the plugin window, and nothing is uploaded.
+
+## Features
+
+- Keeps live text, vector shapes, groups, effects and masks editable.
+- Converts smart objects into native Figma shapes.
+- Optionally keeps hidden layers, imported as hidden.
+- Shows a progress bar while importing, with a **Cancel** button.
+- Ends with a report of layer counts and a list of anything that could not be converted.
+- Runs offline. The manifest blocks all network access.
+
+## Installation
+
+The plugin is loaded as a development plugin from this repository. The compiled `dist/` folder is not committed, so build it first.
+
+1. Run `npm install` and `npm run build` inside `PSD2Fig`.
+2. Open the Figma desktop app.
+3. Go to **Plugins > Development > Import plugin from manifest**.
+4. Select `PSD2Fig/manifest.json`.
+5. Run it from **Plugins > Development > PSD2Fig**.
+
+## Usage
+
+1. Drop a `.psd` file onto the drop zone, or click it to choose a file.
+2. Turn **Keep hidden layers** on or off. When on, hidden layers are imported and hidden in Figma.
+3. Wait for the import to finish. Click **Cancel** to stop it.
+4. A new frame is created next to your existing content. The report shows how many layers, text layers, shapes, smart objects and images were created, followed by any warnings.
 
 ## What each PSD layer becomes
 

@@ -26,9 +26,9 @@ A collection of Figma plugins built for design workflow.
 |:-------:|:-------:|:----------:|
 | <img src="Slugify/slugify.png" width="260" alt="Slugify"> | <img src="Squeezr/image.png" width="260" alt="Squeezr"> | <img src="TypeMacker/image.png" width="260" alt="TypeMacker"> |
 
-| TypeShift |
-|:---------:|
-| <img src="TypeShift/image.png" width="260" alt="TypeShift"> |
+| TypeShift | PSD2Fig |
+|:---------:|:-------:|
+| <img src="TypeShift/image.png" width="260" alt="TypeShift"> | <img src="PSD2Fig/image.png" width="260" alt="PSD2Fig"> |
 
 ## Usage
 

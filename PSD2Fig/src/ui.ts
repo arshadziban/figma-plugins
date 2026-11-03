@@ -58,6 +58,7 @@ async function handle(f: File) {
 }
 
 drop.onclick = () => !busy && file.click();
+drop.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (!busy) file.click(); } };
 file.onchange = () => { const f = file.files?.[0]; if (f) handle(f); file.value = ""; };
 drop.ondragover = (e) => { e.preventDefault(); drop.classList.add("over"); };
 drop.ondragleave = () => drop.classList.remove("over");
