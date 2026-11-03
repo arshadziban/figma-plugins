@@ -1,5 +1,5 @@
 {
-  "name": "psdeditor",
+  "name": "psd2fig",
   "version": "0.1.0",
   "private": true,
   "description": "Figma plugin: imports a PSD as editable Figma layers (text, shapes, groups, effects), with smart objects converted to shapes",

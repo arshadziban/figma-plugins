@@ -1,4 +1,4 @@
-// PSDEditor main thread: builds a native, editable Figma layer tree from the
+// PSD2Fig main thread: builds a native, editable Figma layer tree from the
 // LayerModel the UI parsed out of the PSD. Text becomes real text, vector
 // shapes become vector nodes, groups stay groups, effects become Figma
 // effects, and smart objects become shapes filled with their rendered content.

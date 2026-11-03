@@ -1,6 +1,6 @@
 {
-  "name": "PSDEditor",
-  "id": "psdeditor-psd-to-figma-local-001",
+  "name": "PSD2Fig",
+  "id": "psd2fig-psd-to-figma-local-001",
   "api": "1.0.0",
   "main": "dist/code.js",
   "ui": "dist/ui.html",

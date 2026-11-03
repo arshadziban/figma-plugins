@@ -1,6 +1,6 @@
-# PSDEditor
+# PSD2Fig
 
-PSDEditor imports a Photoshop `.psd` into Figma as **editable layers**, not a flat picture. Drop a file in the plugin window and it builds a new frame next to your existing content.
+PSD2Fig imports a Photoshop `.psd` into Figma as **editable layers**, not a flat picture. Drop a file in the plugin window and it builds a new frame next to your existing content.
 
 Built with TypeScript, esbuild and [ag-psd](https://github.com/Agamnentzar/ag-psd). The PSD is parsed locally in the plugin window, and nothing is uploaded.
 
@@ -36,4 +36,4 @@ npm run build      # dist/code.js + dist/ui.html
 npm run typecheck
 ```
 
-In Figma: Plugins → Development → Import plugin from manifest → `PSDEditor/manifest.json`.
+In Figma: Plugins → Development → Import plugin from manifest → `PSD2Fig/manifest.json`.
