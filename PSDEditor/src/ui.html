@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 16px; font: 12px/1.45 Inter, system-ui, sans-serif;
+    color: var(--figma-color-text, #222); background: var(--figma-color-bg, #fff);
+    display: flex; flex-direction: column; gap: 12px; height: 100vh;
+  }
+  h1 { margin: 0; font-size: 14px; font-weight: 600; }
+  p.sub { margin: 2px 0 0; color: var(--figma-color-text-secondary, #666); }
+  #drop {
+    border: 1.5px dashed var(--figma-color-border-strong, #bbb); border-radius: 8px;
+    padding: 28px 12px; text-align: center; cursor: pointer;
+    color: var(--figma-color-text-secondary, #666);
+  }
+  #drop.over { border-color: var(--figma-color-border-brand, #0d99ff); background: var(--figma-color-bg-brand-tertiary, #e5f4ff); }
+  #drop b { display: block; color: var(--figma-color-text, #222); font-size: 13px; margin-bottom: 2px; }
+  label.opt { display: flex; gap: 6px; align-items: center; }
+  button {
+    font: inherit; font-weight: 600; border: 0; border-radius: 6px; padding: 9px 12px; cursor: pointer;
+    background: var(--figma-color-bg-brand, #0d99ff); color: var(--figma-color-text-onbrand, #fff);
+  }
+  button.ghost { background: transparent; color: var(--figma-color-text, #222); border: 1px solid var(--figma-color-border, #ddd); }
+  button:disabled { opacity: .45; cursor: default; }
+  #file { display: none; }
+  #bar { height: 4px; border-radius: 2px; background: var(--figma-color-bg-tertiary, #eee); overflow: hidden; display: none; }
+  #bar i { display: block; height: 100%; width: 0; background: var(--figma-color-bg-brand, #0d99ff); transition: width .15s; }
+  #status { color: var(--figma-color-text-secondary, #666); min-height: 16px; word-break: break-word; }
+  #status.err { color: var(--figma-color-text-danger, #f24822); }
+  #report { overflow: auto; flex: 1; min-height: 0; }
+  #report ul { margin: 6px 0 0; padding-left: 16px; color: var(--figma-color-text-secondary, #666); }
+  .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .stats div { border: 1px solid var(--figma-color-border, #ddd); border-radius: 6px; padding: 6px; text-align: center; }
+  .stats strong { display: block; font-size: 15px; }
+  .row { display: flex; gap: 8px; }
+  .row button { flex: 1; }
+</style>
+</head>
+<body>
+  <div>
+    <h1>PSDEditor</h1>
+    <p class="sub">Import a .psd as editable Figma layers: live text, vector shapes, groups, effects and masks. Smart objects become shapes.</p>
+  </div>
+  <div id="drop"><b>Drop a PSD here</b>or click to choose a file</div>
+  <input id="file" type="file" accept=".psd,image/vnd.adobe.photoshop,application/x-photoshop">
+  <label class="opt"><input type="checkbox" id="hidden" checked> Keep hidden layers (as hidden)</label>
+  <div id="bar"><i></i></div>
+  <div id="status"></div>
+  <div id="report"></div>
+  <div class="row"><button id="cancel" class="ghost" style="display:none">Cancel</button></div>
+  <!-- SCRIPT -->
+</body>
+</html>
