@@ -47,6 +47,8 @@ export interface Classification {
 }
 
 const CONTAINERS = new Set(['GROUP', 'FRAME', 'COMPONENT', 'COMPONENT_SET', 'INSTANCE', 'SECTION']);
+/** Containers that can be flattened into separate slide objects (their own paint is still emitted first). */
+const UNGROUPABLE = new Set(['GROUP', 'FRAME', 'COMPONENT', 'INSTANCE']);
 const NATIVE_SHAPES = new Set(['RECTANGLE', 'ELLIPSE']);
 
 export function isContainerType(type: string): boolean {
@@ -107,7 +109,7 @@ function classifyContainer(info: LayerInfo): Classification {
   }
   // Mask groups, and groups whose effect/blend belongs to the group as a whole, stay one image above/below.
   const keepsLook = info.hasEffects || !isNormalBlend(info.blendMode);
-  if (info.type === 'GROUP' && info.ungroup && !keepsLook && !info.flipped && info.hasVisibleChild) {
+  if (UNGROUPABLE.has(info.type) && info.ungroup && !keepsLook && !info.flipped && info.hasVisibleChild) {
     return { kind: 'container', reason: 'ungrouped group' };
   }
   if (!info.hasTextDescendant) {
