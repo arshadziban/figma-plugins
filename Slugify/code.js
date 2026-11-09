@@ -2,7 +2,7 @@ figma.showUI(__html__, { width: 360, height: 480, title: "Slugify" });
 
 figma.ui.onmessage = function (msg) {
   if (msg.type === "slugify") {
-    var separator = msg.separator || "_";
+    var separator = msg.separator || "-";
     var slug = msg.text
       .toLowerCase()
       .trim()
