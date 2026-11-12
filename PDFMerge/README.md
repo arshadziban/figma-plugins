@@ -2,6 +2,8 @@
 
 Merge selected Figma frames into **one multi-page PDF**, with a file name you choose.
 
+![PDFMerge plugin UI](image.png)
+
 ## How it works
 
 1. Import or design your pages as frames, then select the ones you want on the canvas.
