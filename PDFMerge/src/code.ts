@@ -7,7 +7,7 @@ const EXPORTABLE = new Set(['FRAME', 'COMPONENT', 'INSTANCE', 'GROUP', 'SECTION'
 let cancelled = false;
 let busy = false;
 
-figma.showUI(__html__, { width: 400, height: 560, themeColors: true });
+figma.showUI(__html__, { width: 400, height: 620, themeColors: true });
 
 function send(msg: MainToUi): void {
   figma.ui.postMessage(msg);

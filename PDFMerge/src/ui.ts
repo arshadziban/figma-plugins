@@ -18,9 +18,16 @@ let working = false;
 const listEl = $<HTMLUListElement>('list');
 const nameEl = $<HTMLInputElement>('filename');
 const mergeBtn = $<HTMLButtonElement>('merge');
+const mergeLabel = $('merge-label');
 const statusEl = $('status');
+const statusText = $('status-text');
 const countEl = $('count');
 const emptyEl = $('empty');
+const toolsEl = $('tools');
+const allBtn = $<HTMLButtonElement>('toggle-all');
+const progressEl = $('progress');
+const progressBar = $('progress-bar');
+const previewEl = $('preview-name');
 
 /** File name without illegal characters; always ends in .pdf. */
 function fileName(): string {
@@ -28,49 +35,110 @@ function fileName(): string {
   return (base || 'merged') + '.pdf';
 }
 
-function setStatus(text: string, error = false): void {
-  statusEl.textContent = text;
-  statusEl.classList.toggle('error', error);
+type Kind = 'info' | 'error' | 'success';
+
+function setStatus(text: string, kind: Kind | boolean = 'info'): void {
+  const k: Kind = kind === true ? 'error' : kind === false ? 'info' : kind;
+  statusText.textContent = text;
+  statusEl.dataset.kind = k;
+  statusEl.hidden = !text;
+}
+
+function setProgress(done: number, total: number): void {
+  progressEl.hidden = total === 0;
+  progressBar.style.width = total ? `${Math.round((done / total) * 100)}%` : '0%';
+}
+
+const ICON = {
+  grip: '<svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="4" cy="2.5" r="1"/><circle cx="8" cy="2.5" r="1"/><circle cx="4" cy="6" r="1"/><circle cx="8" cy="6" r="1"/><circle cx="4" cy="9.5" r="1"/><circle cx="8" cy="9.5" r="1"/></svg>',
+  up: '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5 6 4.5l3 3"/></svg>',
+  down: '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5 6 7.5l3-3"/></svg>',
+};
+
+let dragFrom = -1;
+
+function move(from: number, to: number): void {
+  if (from === to || from < 0 || to < 0 || to >= rows.length) return;
+  const [item] = rows.splice(from, 1);
+  rows.splice(to, 0, item!);
+  render();
 }
 
 function render(): void {
   listEl.textContent = '';
+  let page = 0;
   rows.forEach((r, i) => {
     const li = document.createElement('li');
+    li.className = r.checked ? '' : 'off';
+    li.draggable = !working;
+    li.ondragstart = (e) => {
+      dragFrom = i;
+      li.classList.add('dragging');
+      e.dataTransfer?.setData('text/plain', String(i));
+    };
+    li.ondragend = () => {
+      dragFrom = -1;
+      li.classList.remove('dragging');
+      listEl.querySelectorAll('.over').forEach((x) => x.classList.remove('over'));
+    };
+    li.ondragover = (e) => {
+      e.preventDefault();
+      li.classList.add('over');
+    };
+    li.ondragleave = () => li.classList.remove('over');
+    li.ondrop = (e) => {
+      e.preventDefault();
+      move(dragFrom, i);
+    };
+
+    const grip = document.createElement('span');
+    grip.className = 'grip';
+    grip.innerHTML = ICON.grip;
+
     const cb = document.createElement('input');
     cb.type = 'checkbox';
     cb.checked = r.checked;
     cb.disabled = working;
+    cb.setAttribute('aria-label', `Include ${r.name}`);
     cb.onchange = () => {
       r.checked = cb.checked;
-      update();
+      render();
     };
-    const img = document.createElement('div');
-    img.className = 'thumb';
-    if (r.thumb) img.style.backgroundImage = `url(${r.thumb})`;
+
+    const thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    if (r.thumb) thumb.style.backgroundImage = `url(${r.thumb})`;
+
     const meta = document.createElement('div');
     meta.className = 'meta';
     const n = document.createElement('div');
     n.className = 'name';
     n.textContent = r.name;
-    const s = document.createElement('div');
-    s.className = 'size';
-    s.textContent = `${r.width} × ${r.height}`;
-    meta.append(n, s);
-    const mk = (label: string, title: string, delta: number): HTMLButtonElement => {
+    n.title = r.name;
+    const sz = document.createElement('div');
+    sz.className = 'size';
+    sz.textContent = `${r.width} × ${r.height}`;
+    meta.append(n, sz);
+
+    const badge = document.createElement('span');
+    badge.className = 'badge';
+    badge.textContent = r.checked ? String(++page) : '–';
+
+    const mk = (icon: string, title: string, delta: number): HTMLButtonElement => {
       const b = document.createElement('button');
       b.className = 'icon';
-      b.textContent = label;
+      b.innerHTML = icon;
       b.title = title;
+      b.setAttribute('aria-label', title);
       b.disabled = working || i + delta < 0 || i + delta >= rows.length;
-      b.onclick = () => {
-        const [item] = rows.splice(i, 1);
-        rows.splice(i + delta, 0, item!);
-        render();
-      };
+      b.onclick = () => move(i, i + delta);
       return b;
     };
-    li.append(cb, img, meta, mk('↑', 'Move up', -1), mk('↓', 'Move down', 1));
+    const arrows = document.createElement('div');
+    arrows.className = 'arrows';
+    arrows.append(mk(ICON.up, 'Move up', -1), mk(ICON.down, 'Move down', 1));
+
+    li.append(grip, cb, thumb, meta, arrows, badge);
     listEl.append(li);
   });
   update();
@@ -78,10 +146,16 @@ function render(): void {
 
 function update(): void {
   const n = rows.filter((r) => r.checked).length;
-  countEl.textContent = rows.length ? `${n} of ${rows.length} selected` : '';
-  emptyEl.hidden = rows.length > 0;
+  const has = rows.length > 0;
+  countEl.textContent = has ? `${n} of ${rows.length} included` : '';
+  emptyEl.hidden = has;
+  listEl.hidden = !has;
+  toolsEl.hidden = !has;
+  allBtn.textContent = n === rows.length ? 'Deselect all' : 'Select all';
+  allBtn.disabled = working;
+  previewEl.textContent = fileName();
   mergeBtn.disabled = working || n === 0;
-  mergeBtn.textContent = working ? 'Merging…' : n > 0 ? `Merge ${n} page${n === 1 ? '' : 's'} to PDF` : 'Merge to PDF';
+  mergeLabel.textContent = working ? 'Merging…' : n > 0 ? `Merge ${n} page${n === 1 ? '' : 's'}` : 'Merge to PDF';
 }
 
 /** Existing link annotations of a page, with the URI they open (if any). */
@@ -157,7 +231,7 @@ async function merge(): Promise<void> {
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 10000);
-  setStatus(`Saved ${a.download} (${out.getPageCount()} pages)`);
+  setStatus(`Saved ${a.download} · ${out.getPageCount()} pages`, 'success');
 }
 
 mergeBtn.onclick = () => {
@@ -167,10 +241,17 @@ mergeBtn.onclick = () => {
   pageLinks = [];
   working = true;
   setStatus('Exporting pages…');
+  setProgress(0, ids.length);
   render();
   post({ type: 'export', ids });
 };
 
+allBtn.onclick = () => {
+  const all = rows.some((r) => !r.checked);
+  rows.forEach((r) => (r.checked = all));
+  render();
+};
+nameEl.oninput = () => (previewEl.textContent = fileName());
 nameEl.onkeydown = (e) => {
   if (e.key === 'Enter' && !mergeBtn.disabled) mergeBtn.click();
 };
@@ -189,7 +270,7 @@ onmessage = async (event) => {
       const prev = old.get(id);
       return { ...f, checked: prev ? prev.checked : true, thumb: prev?.thumb };
     });
-    if (!working) setStatus('');
+    if (!working && statusEl.dataset.kind !== 'error') setStatus('');
     render();
   } else if (msg.type === 'thumb') {
     const row = rows.find((r) => r.id === msg.id);
@@ -200,19 +281,22 @@ onmessage = async (event) => {
   } else if (msg.type === 'page') {
     pages.push(msg.bytes);
     pageLinks.push(msg.links);
-    setStatus(`Exporting pages… ${msg.index + 1}/${msg.total}`);
+    setStatus(`Exporting pages… ${msg.index + 1} of ${msg.total}`);
+    setProgress(msg.index + 1, msg.total);
     if (pages.length === msg.total) {
       setStatus('Merging…');
       try {
         await merge();
       } catch (e) {
-        setStatus(`Merge failed: ${e instanceof Error ? e.message : String(e)}`, true);
+        setStatus(`Merge failed: ${e instanceof Error ? e.message : String(e)}`, 'error');
       }
       working = false;
+      setProgress(0, 0);
       render();
     }
   } else if (msg.type === 'error') {
     working = false;
+    setProgress(0, 0);
     setStatus(msg.message, true);
     render();
   }
