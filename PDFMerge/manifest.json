@@ -1,0 +1,10 @@
+{
+  "name": "PDFMerge",
+  "id": "pdfmerge-frames-to-single-pdf-local-001",
+  "api": "1.0.0",
+  "main": "dist/code.js",
+  "ui": "dist/ui.html",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": { "allowedDomains": ["none"] }
+}

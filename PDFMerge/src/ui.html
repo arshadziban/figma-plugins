@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 12px/1.4 Inter, system-ui, sans-serif; color: var(--figma-color-text); background: var(--figma-color-bg); display: flex; flex-direction: column; height: 100vh; }
+  header { padding: 12px 16px 8px; }
+  h1 { margin: 0; font-size: 14px; }
+  p.hint { margin: 2px 0 0; color: var(--figma-color-text-secondary); }
+  label { display: block; padding: 0 16px; font-weight: 600; margin-top: 4px; }
+  .field { display: flex; align-items: center; gap: 6px; margin: 4px 16px 8px; }
+  input[type=text] { flex: 1; height: 28px; padding: 0 8px; border: 1px solid var(--figma-color-border); border-radius: 4px; background: var(--figma-color-bg); color: inherit; font: inherit; }
+  input[type=text]:focus { outline: 1px solid var(--figma-color-border-selected); border-color: var(--figma-color-border-selected); }
+  .ext { color: var(--figma-color-text-secondary); }
+  .bar { display: flex; justify-content: space-between; padding: 0 16px 4px; color: var(--figma-color-text-secondary); }
+  ul { list-style: none; margin: 0; padding: 0 8px; flex: 1; overflow: auto; border-top: 1px solid var(--figma-color-border); }
+  li { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 4px; }
+  li:hover { background: var(--figma-color-bg-hover); }
+  .thumb { width: 40px; height: 40px; flex: none; border-radius: 3px; background: var(--figma-color-bg-secondary) center/contain no-repeat; border: 1px solid var(--figma-color-border); }
+  .meta { flex: 1; min-width: 0; }
+  .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+  .size { color: var(--figma-color-text-secondary); }
+  button.icon { width: 24px; height: 24px; border: 0; border-radius: 4px; background: transparent; color: inherit; cursor: pointer; }
+  button.icon:hover:not(:disabled) { background: var(--figma-color-bg-secondary); }
+  button:disabled { opacity: .35; cursor: default; }
+  #empty { padding: 32px 24px; text-align: center; color: var(--figma-color-text-secondary); }
+  footer { padding: 12px 16px; border-top: 1px solid var(--figma-color-border); display: flex; flex-direction: column; gap: 8px; }
+  #merge { height: 32px; border: 0; border-radius: 6px; background: var(--figma-color-bg-brand); color: var(--figma-color-text-onbrand); font: 600 12px Inter, system-ui, sans-serif; cursor: pointer; }
+  #merge:disabled { opacity: .5; cursor: default; }
+  #status { min-height: 16px; color: var(--figma-color-text-secondary); text-align: center; }
+  #status.error { color: var(--figma-color-text-danger); }
+</style>
+</head>
+<body>
+  <header>
+    <h1>PDFMerge</h1>
+    <p class="hint">Select frames on the canvas, arrange the order, then merge them into one PDF.</p>
+  </header>
+  <label for="filename">File name</label>
+  <div class="field"><input type="text" id="filename" value="merged" placeholder="merged" spellcheck="false"><span class="ext">.pdf</span></div>
+  <div class="bar"><span>Pages (in order)</span><span id="count"></span></div>
+  <ul id="list"></ul>
+  <div id="empty">No frames selected.<br>Select one or more frames on the canvas.</div>
+  <footer>
+    <button id="merge" disabled>Merge to PDF</button>
+    <div id="status"></div>
+  </footer>
+  <!-- SCRIPT -->
+</body>
+</html>
